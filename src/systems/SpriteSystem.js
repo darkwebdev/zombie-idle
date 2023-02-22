@@ -1,0 +1,63 @@
+import { defineQuery, defineSystem, enterQuery, exitQuery } from 'bitecs';
+import { Player, Position, Sprite, Animation } from '../components';
+import { AnimationStates } from '../const';
+
+export default (scene, textures) => {
+    const playerQuery = defineQuery([Player,]);
+    const spriteQuery = defineQuery([Position, Sprite,]);
+    const animationQuery = defineQuery([Animation,]);
+    const spriteQueryEnter = enterQuery(spriteQuery);
+    const spriteQueryExit = exitQuery(spriteQuery);
+
+    const spritesByEntity = new Map();
+    const textureNameByEntity = entity => textures[Sprite.texture[entity]];
+
+    return defineSystem(world => {
+        const [player] = playerQuery(world);
+
+        spriteQueryEnter(world).forEach(entity => {
+            const textureName = textureNameByEntity(entity);
+            const sprite = scene.add
+                .sprite(0, 0, textureName)
+                .setScale(0.5)
+                .setOrigin(0.5, 1);
+            spritesByEntity.set(entity, sprite);
+            if (entity === player) {
+                scene.cameras.main.startFollow(sprite, false, 1, 1, -300, 150);
+            }
+            console.log(entity, sprite.displayWidth, sprite.displayHeight);
+        });
+
+        spriteQuery(world).forEach(entity => {
+            const sprite = spritesByEntity.get(entity);
+            if (sprite) {
+                sprite.setPosition(Position.x[entity], Position.y[entity]);
+            } else {
+                console.error('Sprite not found for entity', entity);
+            }
+        });
+
+        animationQuery(world).forEach(entity => {
+            const textureName = textureNameByEntity(entity);
+            const sprite = spritesByEntity.get(entity);
+            if (sprite) {
+                switch (Animation.state[entity]) {
+                    case AnimationStates.Idle:
+                        return sprite.play(`${textureName}Idle`, true);
+                    case AnimationStates.Walk:
+                        return sprite.play(`${textureName}Walk`, true);
+                    case AnimationStates.Attack:
+                        return sprite.play(`${textureName}Attack`, true);
+                    case AnimationStates.Dead:
+                        return sprite.play(`${textureName}Dead`, true);
+                }
+            }
+        })
+
+        spriteQueryExit(world).forEach(entity => {
+            spritesByEntity.delete(entity);
+        });
+
+        return world;
+    });
+}

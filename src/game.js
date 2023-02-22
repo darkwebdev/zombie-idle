@@ -1,4 +1,18 @@
 import { Scene } from 'phaser';
+import { addComponent, addEntity, createWorld } from 'bitecs';
+
+import { Input, Player, Size, Position, Sprite, Animation, Stats, Velocity } from './components';
+import {
+    createBattleSystem,
+    createDebugSystem, createHealthBarSystem,
+    createMovementSystem,
+    createPlayerSystem,
+    createSpriteSystem
+} from './systems';
+import { createZombieAnims, initialZombieState, } from './zombie';
+import { createCowboyAnims, initialCowboyState } from './cowboy';
+import { createBg } from './bg';
+import { Sprites } from './const';
 
 export class IdleZombie extends Scene {
     constructor() {
@@ -8,80 +22,82 @@ export class IdleZombie extends Scene {
     preload() {
         this.load.image('sky', 'assets/bg/1/Night/1.png');
         for (let line = 0; line < 4; line++) {
-            // if (line === 3) continue;
             for (let screen = 0; screen < 8; screen++) {
                 this.load.image(`building${line}${screen}`, `assets/bg/${screen + 1}/Night/${line + 2}.png`);
             }
         }
         this.load.atlas('zombie', 'assets/zombie.png', 'assets/zombie.json');
+        this.load.atlas('cowboy', 'assets/cowboy.png', 'assets/cowboy.json');
 
         this.cursors = this.input.keyboard.createCursorKeys();
     }
 
     create() {
-        const { width, height } = this.scale;
-        const imgWidth = this.textures.get('sky').getSourceImage().width;
-        const imgHeight = this.textures.get('sky').getSourceImage().height;
+        createBg(this);
+        createZombieAnims(this.anims);
+        createCowboyAnims(this.anims);
 
-        const sky = this.add
-            .tileSprite(0, 0, width, imgHeight, 'sky')
-            .setOrigin(0, 0)
-            .setScrollFactor(0);
-        const buildings = [];
-        for (let line = 0; line < 4; line++) {
-            buildings.push([]);
-            for (let screen = 0; screen < 8; screen++) {
-                const building = this.add
-                    .sprite(imgWidth * screen, 0, `building${line}${screen}`)
-                    .setOrigin(0, 0)
-                    .setScrollFactor((line+1)*0.25);
-                buildings[line].push(building);
-            }
-        }
+        // ECS
+        this.world = createWorld();
+        this.world.name = 'Zombieland';
 
-        this.anims.create({
-            key: 'zombieIdle',
-            frames: this.anims.generateFrameNames('zombie', {
-                prefix: 'zombie/idle_', suffix: '.png',
-                start: 1, end: 8,
-            }),
-            yoyo: true,
-            repeat: -1,
-            frameRate: 12
-        });
-        this.anims.create({
-            key: 'zombieWalk',
-            frames: this.anims.generateFrameNames('zombie', {
-                prefix: 'zombie/walk_', suffix: '.png',
-                start: 1, end: 10,
-            }),
-            repeat: -1,
-            frameRate: 12
-        });
-        this.zombie = this.add
-            .sprite(100, 300, 'zombie')
-            .setScale(0.5)
-            .setScrollFactor(0)
-            .play('zombieIdle');
+        const zombie = addEntity(this.world);
+        addComponent(this.world, Position, zombie);
+        addComponent(this.world, Velocity, zombie);
+        addComponent(this.world, Stats, zombie);
+        addComponent(this.world, Sprite, zombie);
+        addComponent(this.world, Animation, zombie);
+        addComponent(this.world, Player, zombie);
+        addComponent(this.world, Input, zombie);
+        Position.x[zombie] = initialZombieState.x;
+        Position.y[zombie] = initialZombieState.y;
+        Size.width[zombie] = initialZombieState.width;
+        Size.height[zombie] = initialZombieState.height;
+        Velocity.x[zombie] = initialZombieState.velocity;
+        Stats.hp[zombie] = initialZombieState.hp;
+        Stats.maxHp[zombie] = initialZombieState.maxHp;
+        Stats.attack[zombie] = initialZombieState.attack;
+        Stats.attackSpeed[zombie] = initialZombieState.attackSpeed;
+        Sprite.texture[zombie] = Sprites.Zombie;
 
-        // this.cameras.main.startFollow(this.zombie);
+        const cowboy = addEntity(this.world);
+        addComponent(this.world, Position, cowboy);
+        addComponent(this.world, Stats, cowboy);
+        addComponent(this.world, Sprite, cowboy);
+        addComponent(this.world, Animation, cowboy);
+        Position.x[cowboy] = initialCowboyState.x;
+        Position.y[cowboy] = initialCowboyState.y;
+        Size.width[cowboy] = initialCowboyState.width;
+        Size.height[cowboy] = initialCowboyState.height;
+        Stats.hp[cowboy] = initialCowboyState.hp;
+        Stats.maxHp[cowboy] = initialCowboyState.maxHp;
+        Stats.attack[cowboy] = initialCowboyState.attack;
+        Stats.attackSpeed[cowboy] = initialCowboyState.attackSpeed;
+        Sprite.texture[cowboy] = Sprites.Cowboy;
+
+        this.playerSystem = createPlayerSystem(this.cursors);
+        this.movementSystem = createMovementSystem();
+        this.battleSystem = createBattleSystem();
+        this.healthBarSystem = createHealthBarSystem(this);
+        this.spriteSystem = createSpriteSystem(this, Object.keys(Sprites).map(s => s.toLowerCase()));
+        this.debugSystem = createDebugSystem(this);
+
+        // Collisions
+        // const enemies = this.physics.add.group();
+        // enemies.create(0, 0, 'cowboy').setScale(0.5).refreshBody();
+        // this.physics.add.collider(this.zombie, this.cowboy, () => {
+        //     console.log('COLLIDE!');
+        // });
     }
 
-    update(/*time, delta*/) {
+    update(time, delta) {
         // super.update(time, delta);
-        const cam = this.cameras.main;
-        const speed = 3;
-        switch (true) {
-            // case this.cursors.left.isDown:
-            //     cam.scrollX -= speed;
-            //     break;
-            case this.cursors.right.isDown:
-                cam.scrollX += speed;
-                this.zombie.play('zombieWalk', true);
-                break;
-            case this.cursors.right.isUp:
-                this.zombie.play('zombieIdle', true);
-                break;
-        }
+
+        this.playerSystem(this.world);
+        this.movementSystem(this.world);
+        this.battleSystem(this.world);
+        this.healthBarSystem(this.world);
+        this.spriteSystem(this.world);
+        this.debugSystem(this.world);
     }
 }

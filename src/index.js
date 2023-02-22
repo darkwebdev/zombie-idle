@@ -1,4 +1,5 @@
 import { Game, AUTO } from 'phaser';
+import DebugDrawPlugin from 'phaser-plugin-debug-draw';
 import { IdleZombie } from './game';
 
 const config = {
@@ -8,9 +9,23 @@ const config = {
     height: 600,
     physics: {
         default: 'arcade',
-        gravity: { y: 1 }
+        arcade: {
+            debug: true,
+            debugShowBody: true,
+            debugShowStaticBody: true,
+            // gravity: { y: 1 },
+        },
+    },
+    plugins: {
+        scene: [
+            {
+                key: 'DebugDrawPlugin',
+                plugin: DebugDrawPlugin,
+                mapping: 'debugDraw'
+            }
+        ]
     },
     scene: IdleZombie
 };
 
-const game = new Game(config);
+window.game = new Game(config);
