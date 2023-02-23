@@ -58,6 +58,7 @@ export class IdleZombie extends Scene {
         Stats.maxHp[zombie] = initialZombieState.maxHp;
         Stats.attack[zombie] = initialZombieState.attack;
         Stats.attackSpeed[zombie] = initialZombieState.attackSpeed;
+        Stats.hitChance[zombie] = initialZombieState.hitChance;
         Sprite.texture[zombie] = Sprites.Zombie;
 
         const cowboy = addEntity(this.world);
@@ -95,7 +96,7 @@ export class IdleZombie extends Scene {
 
         this.playerSystem(this.world);
         this.movementSystem(this.world);
-        this.battleSystem(this.world);
+        this.battleSystem(this.world, time);
         this.healthBarSystem(this.world);
         this.spriteSystem(this.world);
         this.debugSystem(this.world);

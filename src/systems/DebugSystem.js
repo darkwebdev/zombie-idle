@@ -31,6 +31,7 @@ export default (scene) => {
                 'hp: ' + Stats.hp[player] + '/' + Stats.maxHp[player],
                 'atk: ' + Stats.attack[player],
                 'atk spd: ' + Stats.attackSpeed[player],
+                'hit chance: ' + Stats.hitChance[player],
                 'game spd: ' + Input.speed[player],
             ]);
         } else {

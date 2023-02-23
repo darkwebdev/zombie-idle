@@ -1,20 +1,31 @@
-import { defineQuery, defineSystem } from 'bitecs';
+import { defineQuery, defineSystem, enterQuery, exitQuery } from 'bitecs';
 import { Input, Player, Position, Sprite, Animation, Stats } from '../components';
 import { AnimationStates } from '../const';
-import { checkOverlap, isDead } from './helpers';
+import { isDead, withinMeleeRange } from './helpers';
 
 export default () => {
     const playerQuery = defineQuery([Player,]);
     const battleQuery = defineQuery([Position, Sprite, Animation, ]);
+    const battleQueryEnter = enterQuery(battleQuery);
+    const battleQueryExit = exitQuery(battleQuery);
+    const lastHitTimes = new Map();
 
-    return defineSystem((world) => {
+    return defineSystem((world, time) => {
         const [player] = playerQuery(world);
+
+        battleQueryEnter(world).forEach(entity => {
+            lastHitTimes.set(entity, -Infinity);
+        });
 
         battleQuery(world).forEach(entity => {
             if (Input.speed[player] === 1) {
-                if (player !== entity && checkOverlap(player, entity)) {
-                    attack(player, entity);
-                    Animation.state[player] = AnimationStates.Attack;
+                // console.log(time, lastHitTimes[player], 1000/Stats.attackSpeed[player])
+                if (time > lastHitTimes.get(player) + 1000/Stats.attackSpeed[player]) {
+                    if (player !== entity && withinMeleeRange(entity, player)) {
+                        attack(player, entity);
+                        lastHitTimes.set(player, time);
+                        Animation.state[player] = AnimationStates.Attack;
+                    }
                 }
                 if (isDead(entity)) {
                     Animation.state[entity] = AnimationStates.Dead;
@@ -22,11 +33,18 @@ export default () => {
             }
         });
 
+        battleQueryExit(world).forEach(entity => {
+            lastHitTimes.delete(entity);
+        });
+
         return world;
     });
 }
 
 const attack = (attacker, victim) => {
-    Stats.hp[victim] = Stats.hp[victim] - Stats.attack[attacker];
+    const random = Math.random();
+    const damage = Stats.attack[attacker] * random * (Stats.hitChance[attacker]/100);
+    Stats.hp[victim] = Stats.hp[victim] - damage;
+    console.log('DMG', damage)
 }
 

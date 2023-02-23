@@ -1,40 +1,38 @@
 import { defineQuery, defineSystem } from 'bitecs';
 import { Input, Position, Velocity, Animation, Player } from '../components';
 import { AnimationStates } from '../const';
-import { checkOverlap, isDead } from './helpers';
-
-const BREAK_POINT_MELEE = 300;
-const BREAK_POINT_RANGED = 600;
+import { atMeleeRange, isDead } from './helpers';
 
 export default () => {
     const playerQuery = defineQuery([Player,]);
     const movementQuery = defineQuery([Position, Animation, ]);
 
     return defineSystem((world) => {
-        let isPlayerEntityOverlapping = false;
+        let atMeleeAttackRange = false;
         const [player] = playerQuery(world);
 
         movementQuery(world).forEach(entity => {
-            let isWalking = false;
-
             if (isDead(entity)) {
                 Animation.state[entity] = AnimationStates.Dead;
                 return;
             }
-            if (Input.speed[player] === 1) {
-                if (entity !== player) {
-                    if (checkOverlap(player, entity)) {
-                        isPlayerEntityOverlapping = true;
-                    } else if (Velocity.x[entity]){
-                        isWalking = true;
-                    }
+            if (Input.speed[player] === 0) {
+                Animation.state[entity] = AnimationStates.Idle;
+                return;
+            }
+
+            if (entity !== player) {
+                if (atMeleeRange(entity, player)) {
+                    atMeleeAttackRange = true;
+                    console.log('At melee range!')
+                } else if (Velocity.x[entity]){
+                    updateAnimatedPosition(entity, true);
                 }
             }
 
-            updateAnimatedPosition(entity, isWalking);
         });
 
-        const isPlayerWalking = Input.speed[player] === 1 && Velocity.x[player] && !isPlayerEntityOverlapping;
+        const isPlayerWalking = Input.speed[player] === 1 && Velocity.x[player] && !atMeleeAttackRange;
         updateAnimatedPosition(player, isPlayerWalking);
 
         return world;
@@ -45,7 +43,5 @@ const updateAnimatedPosition = (entity, isWalking = false) => {
     if (isWalking) {
         Position.x[entity] += Velocity.x[entity];
         Animation.state[entity] = AnimationStates.Walk;
-    } else {
-        Animation.state[entity] = AnimationStates.Idle;
     }
 }

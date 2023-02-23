@@ -1,6 +1,8 @@
 import { defineQuery, defineSystem, enterQuery, exitQuery } from 'bitecs';
-import { Player, Position, Sprite, Animation } from '../components';
+import { Player, Position, Sprite, Animation, Stats } from '../components';
 import { AnimationStates } from '../const';
+
+const timeScale = 1;
 
 export default (scene, textures) => {
     const playerQuery = defineQuery([Player,]);
@@ -25,7 +27,6 @@ export default (scene, textures) => {
             if (entity === player) {
                 scene.cameras.main.startFollow(sprite, false, 1, 1, -300, 150);
             }
-            console.log(entity, sprite.displayWidth, sprite.displayHeight);
         });
 
         spriteQuery(world).forEach(entity => {
@@ -43,16 +44,28 @@ export default (scene, textures) => {
             if (sprite) {
                 switch (Animation.state[entity]) {
                     case AnimationStates.Idle:
-                        return sprite.play(`${textureName}Idle`, true);
+                        return sprite.play({
+                            key: `${textureName}Idle`,
+                            timeScale
+                        }, true);
                     case AnimationStates.Walk:
-                        return sprite.play(`${textureName}Walk`, true);
+                        return sprite.play({
+                            key: `${textureName}Walk`,
+                            timeScale
+                        }, true);
                     case AnimationStates.Attack:
-                        return sprite.play(`${textureName}Attack`, true);
+                        return sprite.play({
+                            key: `${textureName}Attack`,
+                            timeScale: Stats.attackSpeed[entity]/2
+                        }, true);
                     case AnimationStates.Dead:
-                        return sprite.play(`${textureName}Dead`, true);
+                        return sprite.play({
+                            key: `${textureName}Dead`,
+                            timeScale
+                        }, true);
                 }
             }
-        })
+        });
 
         spriteQueryExit(world).forEach(entity => {
             spritesByEntity.delete(entity);
