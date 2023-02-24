@@ -1,6 +1,6 @@
 export const initialCowboyState = {
     width: 100,
-    height: 200,
+    height: 300,
     x: 600,
     y: 450,
     hp: 25,

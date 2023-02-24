@@ -4,7 +4,7 @@ import { AnimationStates } from '../const';
 
 const timeScale = 1;
 
-export default (scene, textures) => {
+export default (scene, textures, onDeath = () => {}) => {
     const playerQuery = defineQuery([Player,]);
     const spriteQuery = defineQuery([Position, Sprite,]);
     const animationQuery = defineQuery([Animation,]);
@@ -59,6 +59,10 @@ export default (scene, textures) => {
                             timeScale: Stats.attackSpeed[entity]/2
                         }, true);
                     case AnimationStates.Dead:
+                        sprite.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+                            onDeath(entity);
+                        });
+
                         return sprite.play({
                             key: `${textureName}Dead`,
                             timeScale
@@ -68,6 +72,7 @@ export default (scene, textures) => {
         });
 
         spriteQueryExit(world).forEach(entity => {
+            console.log('EXIT SPRITE', entity)
             spritesByEntity.delete(entity);
         });
 

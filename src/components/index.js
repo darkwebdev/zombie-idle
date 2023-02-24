@@ -6,3 +6,4 @@ export { default as Player } from './Player';
 export { default as Sprite } from './Sprite';
 export { default as Animation } from './Animation';
 export { default as Stats } from './Stats';
+export { default as Damage } from './Damage';

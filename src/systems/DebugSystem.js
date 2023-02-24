@@ -1,5 +1,5 @@
 import { defineQuery, defineSystem } from 'bitecs';
-import { Input, Player, Position, Velocity, Stats } from '../components';
+import { Input, Player, Position, Velocity, Stats, Damage } from '../components';
 
 const style = {
     font: '16px Courier',
@@ -9,6 +9,7 @@ const style = {
 export default (scene) => {
     let debug = true;
     const playerQuery = defineQuery([Player,]);
+    // const damageQuery = defineQuery([Damage,]);
     // const debugQuery = defineQuery([Input,]);
     const text = scene.add
         .text(10, 10, '', style)
@@ -18,7 +19,11 @@ export default (scene) => {
     scene.input.keyboard.on('keydown-BACKTICK', () => {
         debug = !debug;
         scene.debugDraw.toggle();
-    })
+    });
+    scene.input.keyboard.on('keydown-D', () => {
+        console.log('Damaging...')
+        Damage.value[1] = 300;
+    });
 
     return defineSystem((world) => {
         if (debug) {

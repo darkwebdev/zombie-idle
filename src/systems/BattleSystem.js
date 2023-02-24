@@ -1,5 +1,5 @@
 import { defineQuery, defineSystem, enterQuery, exitQuery } from 'bitecs';
-import { Input, Player, Position, Sprite, Animation, Stats } from '../components';
+import { Input, Player, Position, Sprite, Animation, Stats, Damage } from '../components';
 import { AnimationStates } from '../const';
 import { isDead, withinMeleeRange } from './helpers';
 
@@ -19,10 +19,10 @@ export default () => {
 
         battleQuery(world).forEach(entity => {
             if (Input.speed[player] === 1) {
-                // console.log(time, lastHitTimes[player], 1000/Stats.attackSpeed[player])
                 if (time > lastHitTimes.get(player) + 1000/Stats.attackSpeed[player]) {
                     if (player !== entity && withinMeleeRange(entity, player)) {
-                        attack(player, entity);
+                        const damage = attack(player, entity);
+                        Damage.value[entity] = Math.round((damage + Number.EPSILON) * 100);
                         lastHitTimes.set(player, time);
                         Animation.state[player] = AnimationStates.Attack;
                     }
@@ -34,6 +34,7 @@ export default () => {
         });
 
         battleQueryExit(world).forEach(entity => {
+            console.log('EXIT BATTLE', entity)
             lastHitTimes.delete(entity);
         });
 
@@ -45,6 +46,6 @@ const attack = (attacker, victim) => {
     const random = Math.random();
     const damage = Stats.attack[attacker] * random * (Stats.hitChance[attacker]/100);
     Stats.hp[victim] = Stats.hp[victim] - damage;
-    console.log('DMG', damage)
+    return damage;
 }
 

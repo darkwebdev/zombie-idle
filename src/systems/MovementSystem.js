@@ -24,7 +24,6 @@ export default () => {
             if (entity !== player) {
                 if (atMeleeRange(entity, player)) {
                     atMeleeAttackRange = true;
-                    console.log('At melee range!')
                 } else if (Velocity.x[entity]){
                     updateAnimatedPosition(entity, true);
                 }

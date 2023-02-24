@@ -1,13 +1,15 @@
 import { Scene } from 'phaser';
-import { addComponent, addEntity, createWorld } from 'bitecs';
+import { addComponent, addEntity, createWorld, removeEntity } from 'bitecs';
 
-import { Input, Player, Size, Position, Sprite, Animation, Stats, Velocity } from './components';
+import { Input, Player, Size, Position, Sprite, Animation, Stats, Velocity, Damage } from './components';
 import {
     createBattleSystem,
-    createDebugSystem, createHealthBarSystem,
     createMovementSystem,
     createPlayerSystem,
-    createSpriteSystem
+    createSpriteSystem,
+    createHealthBarSystem,
+    createDamageSystem,
+    createDebugSystem,
 } from './systems';
 import { createZombieAnims, initialZombieState, } from './zombie';
 import { createCowboyAnims, initialCowboyState } from './cowboy';
@@ -43,8 +45,10 @@ export class IdleZombie extends Scene {
 
         const zombie = addEntity(this.world);
         addComponent(this.world, Position, zombie);
+        addComponent(this.world, Size, zombie);
         addComponent(this.world, Velocity, zombie);
         addComponent(this.world, Stats, zombie);
+        addComponent(this.world, Damage, zombie);
         addComponent(this.world, Sprite, zombie);
         addComponent(this.world, Animation, zombie);
         addComponent(this.world, Player, zombie);
@@ -63,7 +67,9 @@ export class IdleZombie extends Scene {
 
         const cowboy = addEntity(this.world);
         addComponent(this.world, Position, cowboy);
+        addComponent(this.world, Size, cowboy);
         addComponent(this.world, Stats, cowboy);
+        addComponent(this.world, Damage, cowboy);
         addComponent(this.world, Sprite, cowboy);
         addComponent(this.world, Animation, cowboy);
         Position.x[cowboy] = initialCowboyState.x;
@@ -80,7 +86,12 @@ export class IdleZombie extends Scene {
         this.movementSystem = createMovementSystem();
         this.battleSystem = createBattleSystem();
         this.healthBarSystem = createHealthBarSystem(this);
-        this.spriteSystem = createSpriteSystem(this, Object.keys(Sprites).map(s => s.toLowerCase()));
+        this.damageSystem = createDamageSystem(this);
+        this.spriteSystem = createSpriteSystem(
+            this,
+            Object.keys(Sprites).map(s => s.toLowerCase()),
+            entity => removeEntity(this.world, entity)
+        );
         this.debugSystem = createDebugSystem(this);
 
         // Collisions
@@ -98,6 +109,7 @@ export class IdleZombie extends Scene {
         this.movementSystem(this.world);
         this.battleSystem(this.world, time);
         this.healthBarSystem(this.world);
+        this.damageSystem(this.world);
         this.spriteSystem(this.world);
         this.debugSystem(this.world);
     }

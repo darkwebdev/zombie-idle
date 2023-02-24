@@ -6,7 +6,7 @@ export const initialZombieState = {
     velocity: 5,
     hp: 10,
     maxHp: 10,
-    attack: 1,
+    attack: 10,
     attackSpeed: 1,
     hitChance: 50,
 };
