@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, defineSystem, removeComponent } from 'bitecs';
-import { Input, Position, Velocity, Player, Dead, Walk, Attack, AtMeleeRange } from '../components';
+import { Input, Position, Velocity, Player, Dead, Walk, AtMeleeRange } from '../components';
 import { atMeleeRange, isDead } from './helpers';
 
 export default () => {
@@ -17,7 +17,6 @@ export default () => {
             }
             if (Input.speed[player] === 0) {
                 removeComponent(world, Walk, entity);
-                // removeComponent(world, Attack, entity);
                 return;
             }
 
@@ -32,7 +31,6 @@ export default () => {
         });
 
         const isPlayerWalking = Input.speed[player] === 1 && Velocity.x[player] && !atMeleeRangeQuery(world).length;
-        // console.log('isPlayerWalking', isPlayerWalking)
         updateAnimatedPosition(world, player, isPlayerWalking);
 
         return world;

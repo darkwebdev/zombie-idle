@@ -12,7 +12,7 @@ import {
     Sprite,
     Stats
 } from '../components';
-import { isDead, withinMeleeRange } from './helpers';
+import { isDead } from './helpers';
 
 export default () => {
     const playerQuery = defineQuery([Player,]);
