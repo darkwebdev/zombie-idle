@@ -1,5 +1,5 @@
 import { addComponent, addEntity } from 'bitecs';
-import { AttackedMelee, Damage, Input, Player, Position, Size, Sprite, Stats, Velocity } from '../components';
+import { Damage, Input, Player, Position, Size, Sprite, Stats, Velocity } from '../components';
 import { Sprites } from '../const';
 
 const initialZombieState = {
@@ -37,7 +37,6 @@ export const addZombieEntity = world => {
     addComponent(world, Velocity, zombie);
     addComponent(world, Stats, zombie);
     addComponent(world, Damage, zombie);
-    addComponent(world, AttackedMelee, zombie);
     addComponent(world, Sprite, zombie);
     addComponent(world, Player, zombie);
     addComponent(world, Input, zombie);

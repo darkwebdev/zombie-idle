@@ -7,14 +7,13 @@ import {
     createPlayerSystem,
     createSpriteSystem,
     createHealthBarSystem,
-    createDamageSystem,
     createDebugSystem,
+    createDamageDisplaySystem,
 } from './systems';
 import { createZombieAnims, addZombieEntity, respawnZombie, } from './entities/Zombie';
 import { createCowboyAnims, addCowboyEntity, respawnCowboy } from './entities/Cowboy';
 import { createBg } from './bg';
 import { Sprites } from './const';
-import { addDummyEntity } from './entities/Dummy';
 
 export class IdleZombie extends Scene {
     constructor() {
@@ -42,7 +41,6 @@ export class IdleZombie extends Scene {
         // ECS
         this.world = window.world = createWorld();
         this.world.name = 'Zombieland';
-        addDummyEntity(this.world); // eid = 0
         const zombie = addZombieEntity(this.world);
         respawnZombie(zombie);
         const cowboy = addCowboyEntity(this.world);
@@ -52,7 +50,7 @@ export class IdleZombie extends Scene {
         this.movementSystem = createMovementSystem();
         this.battleSystem = createBattleSystem();
         this.healthBarSystem = createHealthBarSystem(this);
-        this.damageSystem = createDamageSystem(this);
+        this.damageDisplaySystem = createDamageDisplaySystem(this);
         this.spriteSystem = createSpriteSystem(this, Object.keys(Sprites).map(s => s.toLowerCase()));
         this.debugSystem = createDebugSystem(this);
 
@@ -71,7 +69,7 @@ export class IdleZombie extends Scene {
         this.movementSystem(this.world);
         this.battleSystem(this.world, time);
         this.healthBarSystem(this.world);
-        this.damageSystem(this.world);
+        this.damageDisplaySystem(this.world);
         this.spriteSystem(this.world);
         this.debugSystem(this.world);
     }

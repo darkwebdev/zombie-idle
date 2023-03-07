@@ -34,10 +34,10 @@ export default () => {
 
         hitMeleeQueryEnter(world).forEach(entity => {
             console.log('Battle: Hit Melee!')
+            removeComponent(world, AttackedMelee, entity);
+            removeComponent(world, HitMelee, entity);
             const damage = doDamage(player, entity);
             showDamage(entity, damage);
-            removeMeleeTarget(world, entity);
-            removeComponent(world, HitMelee, entity);
         });
 
         switch (Input.speed[player]) {
@@ -52,7 +52,8 @@ export default () => {
                     atMeleeRangeQuery(world).forEach(enemy => {
                         lastHitTimes.set(player, time);
                         addComponent(world, Attack, player);
-                        addMeleeTarget(player, enemy);
+                        addComponent(world, AttackedMelee, enemy);
+                        AttackedMelee.attacker[enemy] = player;
                     });
                 }
                 break;
@@ -68,7 +69,7 @@ export default () => {
         });
 
         battleQueryExit(world).forEach(entity => {
-            console.log('EXIT BATTLE', entity)
+            console.log('Battle: exit', entity)
             lastHitTimes.delete(entity);
         });
 
@@ -81,14 +82,6 @@ const doDamage = (attacker, target) => {
     const damage = Stats.attack[attacker] * random * (Stats.hitChance[attacker]/100);
     Stats.hp[target] = Stats.hp[target] - damage;
     return damage;
-}
-
-const addMeleeTarget = (attacker, newTarget) => {
-    AttackedMelee.attacker[newTarget] = attacker;
-}
-
-const removeMeleeTarget = (world, entity) => {
-    removeComponent(world, AttackedMelee, entity);
 }
 
 const showDamage = (entity, damage) => {
