@@ -8,7 +8,7 @@ import {
     removeComponent,
     removeEntity
 } from 'bitecs';
-import { Attack, AttackedMelee, Dead, HitMelee, Player, Position, Sprite, Stats, Walk } from '../components';
+import { Attack, AttackedMelee, Dead, HitMelee, Input, Player, Position, Sprite, Stats, Walk } from '../components';
 import { ATTACK_HIT_FRAME } from '../entities/Zombie';
 
 const timeScale = 1;
@@ -36,7 +36,13 @@ export default (scene, textures) => {
             const sprite = scene.add
                 .sprite(0, 0, textureName)
                 .setScale(0.5)
-                .setOrigin(0.5, 1);
+                .setOrigin(0.5, 1)
+                .setInteractive()
+                .on(Phaser.Input.Events.POINTER_DOWN, () => {
+                    if (Input.debug[player]) {
+                        addComponent(world, HitMelee, entity);
+                    }
+                })
             spritesByEntity.set(entity, sprite);
             if (entity === player) {
                 scene.cameras.main.startFollow(sprite, false, 1, 1, -300, 150);
@@ -76,10 +82,8 @@ export default (scene, textures) => {
             const sprite = spritesByEntity.get(AttackedMelee.attacker[entity]);
             if (sprite) {
                 sprite.on(Phaser.Animations.Events.ANIMATION_UPDATE, (anim, frame) => {
-                    // console.log('Animation update!', anim.key, frame.index, frameKey);
                     if (anim.key.endsWith('Attack') && frame.index === ATTACK_HIT_FRAME) {
                         addComponent(world, HitMelee, entity);
-                        console.log('HIT!');
                     }
                 });
             }

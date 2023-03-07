@@ -40,7 +40,7 @@ export class IdleZombie extends Scene {
         createCowboyAnims(this.anims);
 
         // ECS
-        this.world = createWorld();
+        this.world = window.world = createWorld();
         this.world.name = 'Zombieland';
         addDummyEntity(this.world); // eid = 0
         const zombie = addZombieEntity(this.world);
@@ -48,16 +48,12 @@ export class IdleZombie extends Scene {
         const cowboy = addCowboyEntity(this.world);
         respawnCowboy(cowboy);
 
-        this.playerSystem = createPlayerSystem(this.cursors);
+        this.playerSystem = createPlayerSystem();
         this.movementSystem = createMovementSystem();
         this.battleSystem = createBattleSystem();
         this.healthBarSystem = createHealthBarSystem(this);
         this.damageSystem = createDamageSystem(this);
-        this.spriteSystem = createSpriteSystem(
-            this,
-            Object.keys(Sprites).map(s => s.toLowerCase()),
-            // entity => removeEntity(this.world, entity)
-        );
+        this.spriteSystem = createSpriteSystem(this, Object.keys(Sprites).map(s => s.toLowerCase()));
         this.debugSystem = createDebugSystem(this);
 
         // Collisions
