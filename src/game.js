@@ -1,7 +1,6 @@
 import { Scene } from 'phaser';
-import { addComponent, addEntity, createWorld, removeEntity } from 'bitecs';
+import { createWorld } from 'bitecs';
 
-import { Input, Player, Size, Position, Sprite, Animation, Stats, Velocity, Damage } from './components';
 import {
     createBattleSystem,
     createMovementSystem,
@@ -11,10 +10,11 @@ import {
     createDamageSystem,
     createDebugSystem,
 } from './systems';
-import { createZombieAnims, initialZombieState, } from './zombie';
-import { createCowboyAnims, initialCowboyState } from './cowboy';
+import { createZombieAnims, addZombieEntity, respawnZombie, } from './entities/Zombie';
+import { createCowboyAnims, addCowboyEntity, respawnCowboy } from './entities/Cowboy';
 import { createBg } from './bg';
 import { Sprites } from './const';
+import { addDummyEntity } from './entities/Dummy';
 
 export class IdleZombie extends Scene {
     constructor() {
@@ -42,45 +42,11 @@ export class IdleZombie extends Scene {
         // ECS
         this.world = createWorld();
         this.world.name = 'Zombieland';
-
-        const zombie = addEntity(this.world);
-        addComponent(this.world, Position, zombie);
-        addComponent(this.world, Size, zombie);
-        addComponent(this.world, Velocity, zombie);
-        addComponent(this.world, Stats, zombie);
-        addComponent(this.world, Damage, zombie);
-        addComponent(this.world, Sprite, zombie);
-        addComponent(this.world, Animation, zombie);
-        addComponent(this.world, Player, zombie);
-        addComponent(this.world, Input, zombie);
-        Position.x[zombie] = initialZombieState.x;
-        Position.y[zombie] = initialZombieState.y;
-        Size.width[zombie] = initialZombieState.width;
-        Size.height[zombie] = initialZombieState.height;
-        Velocity.x[zombie] = initialZombieState.velocity;
-        Stats.hp[zombie] = initialZombieState.hp;
-        Stats.maxHp[zombie] = initialZombieState.maxHp;
-        Stats.attack[zombie] = initialZombieState.attack;
-        Stats.attackSpeed[zombie] = initialZombieState.attackSpeed;
-        Stats.hitChance[zombie] = initialZombieState.hitChance;
-        Sprite.texture[zombie] = Sprites.Zombie;
-
-        const cowboy = addEntity(this.world);
-        addComponent(this.world, Position, cowboy);
-        addComponent(this.world, Size, cowboy);
-        addComponent(this.world, Stats, cowboy);
-        addComponent(this.world, Damage, cowboy);
-        addComponent(this.world, Sprite, cowboy);
-        addComponent(this.world, Animation, cowboy);
-        Position.x[cowboy] = initialCowboyState.x;
-        Position.y[cowboy] = initialCowboyState.y;
-        Size.width[cowboy] = initialCowboyState.width;
-        Size.height[cowboy] = initialCowboyState.height;
-        Stats.hp[cowboy] = initialCowboyState.hp;
-        Stats.maxHp[cowboy] = initialCowboyState.maxHp;
-        Stats.attack[cowboy] = initialCowboyState.attack;
-        Stats.attackSpeed[cowboy] = initialCowboyState.attackSpeed;
-        Sprite.texture[cowboy] = Sprites.Cowboy;
+        addDummyEntity(this.world); // eid = 0
+        const zombie = addZombieEntity(this.world);
+        respawnZombie(zombie);
+        const cowboy = addCowboyEntity(this.world);
+        respawnCowboy(cowboy);
 
         this.playerSystem = createPlayerSystem(this.cursors);
         this.movementSystem = createMovementSystem();
@@ -90,7 +56,7 @@ export class IdleZombie extends Scene {
         this.spriteSystem = createSpriteSystem(
             this,
             Object.keys(Sprites).map(s => s.toLowerCase()),
-            entity => removeEntity(this.world, entity)
+            // entity => removeEntity(this.world, entity)
         );
         this.debugSystem = createDebugSystem(this);
 

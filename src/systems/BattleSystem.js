@@ -1,11 +1,26 @@
-import { defineQuery, defineSystem, enterQuery, exitQuery } from 'bitecs';
-import { Input, Player, Position, Sprite, Animation, Stats, Damage } from '../components';
-import { AnimationStates } from '../const';
+import { addComponent, defineQuery, defineSystem, enterQuery, exitQuery, removeComponent } from 'bitecs';
+import {
+    AtMeleeRange,
+    Attack,
+    AttackedMelee,
+    Damage,
+    Dead,
+    HitMelee,
+    Input,
+    Player,
+    Position,
+    Sprite,
+    Stats
+} from '../components';
 import { isDead, withinMeleeRange } from './helpers';
 
 export default () => {
     const playerQuery = defineQuery([Player,]);
-    const battleQuery = defineQuery([Position, Sprite, Animation, ]);
+    // const enemiesQuery = defineQuery([Position, Sprite, Not(Player),]);
+    const battleQuery = defineQuery([Position, Sprite, ]);
+    const atMeleeRangeQuery = defineQuery([AtMeleeRange, ]);
+    const hitMeleeQuery = defineQuery([HitMelee, ]);
+    const hitMeleeQueryEnter = enterQuery(hitMeleeQuery);
     const battleQueryEnter = enterQuery(battleQuery);
     const battleQueryExit = exitQuery(battleQuery);
     const lastHitTimes = new Map();
@@ -17,19 +32,38 @@ export default () => {
             lastHitTimes.set(entity, -Infinity);
         });
 
-        battleQuery(world).forEach(entity => {
-            if (Input.speed[player] === 1) {
-                if (time > lastHitTimes.get(player) + 1000/Stats.attackSpeed[player]) {
-                    if (player !== entity && withinMeleeRange(entity, player)) {
-                        const damage = attack(player, entity);
-                        Damage.value[entity] = Math.round((damage + Number.EPSILON) * 100);
+        hitMeleeQueryEnter(world).forEach(entity => {
+            console.log('Battle: Hit Melee!')
+            const damage = doDamage(player, entity);
+            showDamage(entity, damage);
+            removeMeleeTarget(world, entity);
+            removeComponent(world, HitMelee, entity);
+        });
+
+        switch (Input.speed[player]) {
+            case 0:
+                removeComponent(world, Attack, player);
+                break;
+            case 1:
+                if (atMeleeRangeQuery(world).length === 0) {
+                    removeComponent(world, Attack, player);
+                }
+                if (time > lastHitTimes.get(player) + 1000 / Stats.attackSpeed[player]) {
+                    atMeleeRangeQuery(world).forEach(enemy => {
                         lastHitTimes.set(player, time);
-                        Animation.state[player] = AnimationStates.Attack;
-                    }
+                        addComponent(world, Attack, player);
+                        addMeleeTarget(player, enemy);
+                    });
                 }
-                if (isDead(entity)) {
-                    Animation.state[entity] = AnimationStates.Dead;
-                }
+                break;
+            default:
+                // not implemented
+        }
+
+        battleQuery(world).forEach(entity => {
+            if (isDead(entity)) {
+                addComponent(world, Dead, entity);
+                removeComponent(world, AtMeleeRange, entity);
             }
         });
 
@@ -42,10 +76,21 @@ export default () => {
     });
 }
 
-const attack = (attacker, victim) => {
+const doDamage = (attacker, target) => {
     const random = Math.random();
     const damage = Stats.attack[attacker] * random * (Stats.hitChance[attacker]/100);
-    Stats.hp[victim] = Stats.hp[victim] - damage;
+    Stats.hp[target] = Stats.hp[target] - damage;
     return damage;
 }
 
+const addMeleeTarget = (attacker, newTarget) => {
+    AttackedMelee.attacker[newTarget] = attacker;
+}
+
+const removeMeleeTarget = (world, entity) => {
+    removeComponent(world, AttackedMelee, entity);
+}
+
+const showDamage = (entity, damage) => {
+    Damage.value[entity] = Math.round((damage + Number.EPSILON) * 100);
+}

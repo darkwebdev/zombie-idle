@@ -1,46 +1,49 @@
-import { defineQuery, defineSystem } from 'bitecs';
-import { Input, Position, Velocity, Animation, Player } from '../components';
-import { AnimationStates } from '../const';
+import { addComponent, defineQuery, defineSystem, removeComponent } from 'bitecs';
+import { Input, Position, Velocity, Player, Dead, Walk, Attack, AtMeleeRange } from '../components';
 import { atMeleeRange, isDead } from './helpers';
 
 export default () => {
     const playerQuery = defineQuery([Player,]);
-    const movementQuery = defineQuery([Position, Animation, ]);
+    const movementQuery = defineQuery([Position, ]);
+    const atMeleeRangeQuery = defineQuery([AtMeleeRange, ]);
 
     return defineSystem((world) => {
-        let atMeleeAttackRange = false;
         const [player] = playerQuery(world);
 
         movementQuery(world).forEach(entity => {
             if (isDead(entity)) {
-                Animation.state[entity] = AnimationStates.Dead;
+                addComponent(world, Dead, entity);
                 return;
             }
             if (Input.speed[player] === 0) {
-                Animation.state[entity] = AnimationStates.Idle;
+                removeComponent(world, Walk, entity);
+                // removeComponent(world, Attack, entity);
                 return;
             }
 
             if (entity !== player) {
                 if (atMeleeRange(entity, player)) {
-                    atMeleeAttackRange = true;
+                    addComponent(world, AtMeleeRange, entity);
                 } else if (Velocity.x[entity]){
-                    updateAnimatedPosition(entity, true);
+                    removeComponent(world, AtMeleeRange, entity);
+                    updateAnimatedPosition(world, entity, true);
                 }
             }
-
         });
 
-        const isPlayerWalking = Input.speed[player] === 1 && Velocity.x[player] && !atMeleeAttackRange;
-        updateAnimatedPosition(player, isPlayerWalking);
+        const isPlayerWalking = Input.speed[player] === 1 && Velocity.x[player] && !atMeleeRangeQuery(world).length;
+        // console.log('isPlayerWalking', isPlayerWalking)
+        updateAnimatedPosition(world, player, isPlayerWalking);
 
         return world;
     });
 }
 
-const updateAnimatedPosition = (entity, isWalking = false) => {
+const updateAnimatedPosition = (world, entity, isWalking = false) => {
     if (isWalking) {
         Position.x[entity] += Velocity.x[entity];
-        Animation.state[entity] = AnimationStates.Walk;
+        addComponent(world, Walk, entity);
+    } else {
+        removeComponent(world, Walk, entity);
     }
 }
