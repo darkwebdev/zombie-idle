@@ -15,7 +15,7 @@ const initialZombieState = {
     attackSpeed: 1,
     hitChance: 50,
     criticalChance: 30,
-    criticalDamage: 3,
+    criticalDamage: 300,
     // Skills
     attack: 1,
     crowdAttack: 0,

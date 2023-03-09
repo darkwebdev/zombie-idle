@@ -41,8 +41,18 @@ export default (scene) => {
     scene.input.keyboard.on('keydown-SPACE', () => {
         Input.autoplay[player] = 1 - Input.autoplay[player];
     });
+    scene.input.keyboard.on('keydown-H', () => {
+        Stats.hitChance[player] += 10;
+    });
+    scene.input.keyboard.on('keydown-C', () => {
+        Stats.criticalChance[player] += 10;
+    });
     scene.input.keyboard.on('keydown-D', () => {
-        Damage.value[enemy] = 300;
+        if (scene.cursors.shift.isDown) {
+            Damage.value[enemy] = 300;
+        } else {
+            Stats.criticalDamage[player] += 10;
+        }
     });
     scene.input.keyboard.on('keydown-R', () => {
         enemy = addCowboyEntity(scene.world);
@@ -99,7 +109,7 @@ export default (scene) => {
                 `Hotkeys`,
                 'Space - autoplay on/off',
                 'Arrow right - play step',
-                'D (or click) - show damage',
+                'H - increase hit chance',
                 'R - respawn target',
             ]);
         } else {

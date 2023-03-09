@@ -41,6 +41,13 @@ export default (scene, textures) => {
             }
         });
 
+        spriteQueryExit(world).forEach(entity => {
+            console.log('SPRITE: exit', entity)
+            const sprite = spritesByEntity.get(entity);
+            sprite.off(Phaser.Input.Events.POINTER_DOWN);
+            spritesByEntity.delete(entity);
+        });
+
         spriteQuery(world).forEach(entity => {
             const sprite = spritesByEntity.get(entity);
             if (sprite) {
@@ -97,11 +104,6 @@ export default (scene, textures) => {
         idleQuery(world).forEach(entity => {
             const textureName = textureNameByEntity(entity);
             spritesByEntity.get(entity)?.play({ key: `${textureName}Idle`, timeScale }, true);
-        });
-
-        spriteQueryExit(world).forEach(entity => {
-            console.log('SPRITE: exit', entity)
-            spritesByEntity.delete(entity);
         });
 
         return world;

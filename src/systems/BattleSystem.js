@@ -94,23 +94,36 @@ export default () => {
 }
 
 const doDamage = (attacker, target) => {
-    const hitResult = Math.random() * Stats.hitChance[attacker]/100;
-    const missed = hitResult < Stats.hitChance[attacker]/200;
+    const missed = Stats.hitChance[attacker] < 100 && Math.random() * 100 > Stats.hitChance[attacker];
 
     if (missed) {
-        return 0;
+        return {
+            isMiss: true
+        };
     }
 
     const avgAttack = Skills.attack[attacker][SkillProps.Level] * HP_PER_ATTACK_LEVEL;
     const minAttack = avgAttack * (1 - ATTACK_DEVIATION_PERCENT/100/2);
     const randomDeviation = Math.random() * avgAttack * ATTACK_DEVIATION_PERCENT/100;
-    const damage = minAttack + randomDeviation;
+    const critMultiplier = criticalMultiplier(attacker, target);
+    const damage = Math.ceil((minAttack + randomDeviation) * critMultiplier);
 
     Stats.hp[target] = Stats.hp[target] - damage;
 
-    return damage;
+    return {
+        value: damage,
+        isCritical: critMultiplier > 1,
+    };
 }
 
 const showDamage = (entity, damage) => {
-    Damage.value[entity] = Math.round((damage + Number.EPSILON) * 100);
+    Damage.value[entity] = damage.value;
+    Damage.isCritical[entity] = damage.isCritical ? 1 : 0;
+    Damage.isMiss[entity] = damage.isMiss ? 1 : 0;
+}
+
+const criticalMultiplier = (attacker, target) => {
+    const isCritical = Stats.criticalChance[attacker] < 100 && Math.random() * 100 <= Stats.criticalChance[attacker];
+
+    return isCritical ? Stats.criticalDamage[attacker] / 100 : 1;
 }

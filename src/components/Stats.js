@@ -6,5 +6,5 @@ export default defineComponent({
     attackSpeed: Types.ui16, // per sec
     hitChance: Types.ui8, // % probability
     criticalChance: Types.ui8, // % probability
-    criticalDamage: Types.ui16 // multiplier of Attack skill (example: attack(10) x critDmg(2) = 20 damage
+    criticalDamage: Types.ui16 // % multiplier of Attack skill (example: attack(10) x critDmg(200%) = 20 damage
 });
