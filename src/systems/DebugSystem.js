@@ -75,7 +75,7 @@ export default (scene) => {
                 'hp: ' + Stats.hp[player] + '/' + Stats.maxHp[player],
                 `atk spd: ${Stats.attackSpeed[player]}/sec`,
                 `hit chance: ${Stats.hitChance[player]}%`,
-                `crit chance: ${Stats.criticalChance[player]}%`,
+                `crit chance/dmg: ${Stats.criticalChance[player]}%/${Stats.criticalDamage[player]}`,
             ]);
             // console.log(Skills)
             cols[1].setText([

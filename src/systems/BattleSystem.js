@@ -1,4 +1,4 @@
-import { addComponent, defineQuery, defineSystem, enterQuery, exitQuery, removeComponent } from 'bitecs';
+import { addComponent, defineQuery, defineSystem, enterQuery, removeComponent } from 'bitecs';
 import {
     AtMeleeRange,
     Attack,
@@ -8,12 +8,13 @@ import {
     HitMelee,
     Input,
     Player,
-    Position, Skills,
+    Position,
+    Skills,
     Sprite,
     Stats
 } from '../components';
 import { coolDownFromAtkSpeed, isDead } from './helpers';
-import { HP_PER_ATTACK_LEVEL, SkillProps } from '../const';
+import { ATTACK_DEVIATION_PERCENT, HP_PER_ATTACK_LEVEL, SkillProps } from '../const';
 
 export default () => {
     const playerQuery = defineQuery([Player,]);
@@ -22,8 +23,8 @@ export default () => {
     const atMeleeRangeQuery = defineQuery([AtMeleeRange, ]);
     const hitMeleeQuery = defineQuery([HitMelee, ]);
     const hitMeleeQueryEnter = enterQuery(hitMeleeQuery);
-    const battleQueryEnter = enterQuery(battleQuery);
-    const battleQueryExit = exitQuery(battleQuery);
+    // const battleQueryEnter = enterQuery(battleQuery);
+    // const battleQueryExit = exitQuery(battleQuery);
     const lastTimeSkillUsed = new Map();
 
     return defineSystem((world, time, delta) => {
@@ -35,10 +36,6 @@ export default () => {
             addComponent(world, AttackedMelee, enemy);
             AttackedMelee.attacker[enemy] = player;
         };
-
-        battleQueryEnter(world).forEach(entity => {
-            lastTimeSkillUsed.set(entity, -Infinity);
-        });
 
         hitMeleeQueryEnter(world).forEach(entity => {
             console.log('Battle: Hit Melee!')
@@ -92,22 +89,25 @@ export default () => {
             }
         });
 
-        battleQueryExit(world).forEach(entity => {
-            console.log('Battle: exit', entity)
-            lastTimeSkillUsed.delete(entity);
-        });
-
         return world;
     });
 }
 
 const doDamage = (attacker, target) => {
-    const random = Math.random();
-    const damage = Skills.attack[attacker][SkillProps.Level]
-        * HP_PER_ATTACK_LEVEL
-        * random
-        * (Stats.hitChance[attacker]/100);
+    const hitResult = Math.random() * Stats.hitChance[attacker]/100;
+    const missed = hitResult < Stats.hitChance[attacker]/200;
+
+    if (missed) {
+        return 0;
+    }
+
+    const avgAttack = Skills.attack[attacker][SkillProps.Level] * HP_PER_ATTACK_LEVEL;
+    const minAttack = avgAttack * (1 - ATTACK_DEVIATION_PERCENT/100/2);
+    const randomDeviation = Math.random() * avgAttack * ATTACK_DEVIATION_PERCENT/100;
+    const damage = minAttack + randomDeviation;
+
     Stats.hp[target] = Stats.hp[target] - damage;
+
     return damage;
 }
 

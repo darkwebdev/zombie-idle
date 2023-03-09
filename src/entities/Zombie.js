@@ -14,6 +14,8 @@ const initialZombieState = {
     maxHp: 10,
     attackSpeed: 1,
     hitChance: 50,
+    criticalChance: 30,
+    criticalDamage: 3,
     // Skills
     attack: 1,
     crowdAttack: 0,
@@ -32,6 +34,8 @@ export const respawnZombie = entity => {
     Stats.maxHp[entity] = initialZombieState.maxHp;
     Stats.attackSpeed[entity] = initialZombieState.attackSpeed;
     Stats.hitChance[entity] = initialZombieState.hitChance;
+    Stats.criticalChance[entity] = initialZombieState.criticalChance;
+    Stats.criticalDamage[entity] = initialZombieState.criticalDamage;
 
     Skills.attack[entity] = [initialZombieState.attack, coolDownFromAtkSpeed(initialZombieState.attackSpeed)];
     Skills.crowdAttack[entity] = [initialZombieState.crowdAttack, coolDownFromAtkSpeed(initialZombieState.attackSpeed)];

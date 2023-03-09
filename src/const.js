@@ -12,3 +12,4 @@ export const MELEE_ATTACK_RANGE = 150;
 export const RANGED_ATTACK_RANGE = 400;
 export const MAX_TARGETS = 20;
 export const HP_PER_ATTACK_LEVEL = 10;
+export const ATTACK_DEVIATION_PERCENT = 50;

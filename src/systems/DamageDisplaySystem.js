@@ -19,7 +19,7 @@ export default (scene) => {
         });
         damageQuery(world).forEach(entity => {
             if (Damage.value[entity] >= 0) {
-                const damage = Damage.value[entity] / 100;
+                const damage = Damage.value[entity] / 100 || 'Miss!';
                 console.log('Damage system', damage)
                 const x = Position.x[entity];
                 const y = Position.y[entity] - Size.height[entity] - 10;
