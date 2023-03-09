@@ -17,3 +17,5 @@ export const atMeleeRange = (entity, player) =>
 
 // export const inRangedRange = (entity, player) =>
 //     Position.x[entity] < Position.x[player] + RANGED_ATTACK_RANGE;
+
+export const coolDownFromAtkSpeed = attackSpeed => 1000 / attackSpeed;

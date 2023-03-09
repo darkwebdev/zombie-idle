@@ -67,7 +67,7 @@ export class IdleZombie extends Scene {
 
         this.playerSystem(this.world);
         this.movementSystem(this.world);
-        this.battleSystem(this.world, time);
+        this.battleSystem(this.world, time, delta);
         this.healthBarSystem(this.world);
         this.damageDisplaySystem(this.world);
         this.spriteSystem(this.world);

@@ -1,14 +1,26 @@
 import { defineQuery, defineSystem, hasComponent, Not } from 'bitecs';
-import { Attack, AttackedMelee, Damage, Dead, Input, Player, Position, Stats, Velocity, Walk } from '../components';
+import {
+    Attack,
+    AttackedMelee,
+    Damage,
+    Dead,
+    Input,
+    Player,
+    Position,
+    Skills,
+    Stats,
+    Velocity,
+    Walk
+} from '../components';
 import { addCowboyEntity, respawnCowboy } from '../entities/Cowboy';
+import { SkillProps } from '../const';
 
 const style = {
     font: '16px Courier',
     fill: '#00aa00',
 };
-const COL_X = 10;
 const COL_Y = 490;
-const COL_WIDTH = 250;
+const colXs = [10, 160, 360, 550, 750];
 let enemy = 1;
 
 export default (scene) => {
@@ -17,8 +29,8 @@ export default (scene) => {
     const attackedMeleeQuery = defineQuery([AttackedMelee,]);
 
     Input.debug[player] = 1;
-    const cols = [0,1,2].map(i => scene.add
-        .text(COL_X+COL_WIDTH*i, COL_Y, '', style)
+    const cols = [0,1,2,3].map(i => scene.add
+        .text(colXs[i], COL_Y, '', style)
         .setOrigin(0, 0)
         .setScrollFactor(0));
 
@@ -61,17 +73,29 @@ export default (scene) => {
                 `Player [${state(player)}]`,
                 `x: ${Position.x[player]}, vx: ${Velocity.x[player]}`,
                 'hp: ' + Stats.hp[player] + '/' + Stats.maxHp[player],
-                `atk power: ${Stats.attack[player]}`,
                 `atk spd: ${Stats.attackSpeed[player]}/sec`,
                 `hit chance: ${Stats.hitChance[player]}%`,
+                `crit chance: ${Stats.criticalChance[player]}%`,
+            ]);
+            // console.log(Skills)
+            cols[1].setText([
+                `Skills`,
+                Object
+                    .keys(Skills)
+                    .map(name => {
+                        const level = Skills[name][player][SkillProps.Level];
+                        const cooldown = (Skills[name][player][SkillProps.Cooldown] / 1000).toFixed(1);
+                        return `${name}: ${level} [-${cooldown}]`;
+                    })
+                    .join('\n'),
             ]);
             const meleeTargets = attackedMeleeEntities.filter(e => AttackedMelee.attacker[e] === player);
-            cols[1].setText([
-                `Enemy [${state(enemy)}]`,
-                `all enemies (${enemies.length}): [${enemies}]`,
-                `melee targets (${meleeTargets.length}): [${meleeTargets}]`,
-            ]);
             cols[2].setText([
+                `Enemy [${state(enemy)}]`,
+                `entities (${enemies.length}):\n[${enemies}]`,
+                `melee targets (${meleeTargets.length}):\n[${meleeTargets}]`,
+            ]);
+            cols[3].setText([
                 `Hotkeys`,
                 'Space - autoplay on/off',
                 'Arrow right - play step',

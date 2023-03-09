@@ -7,10 +7,13 @@ const initialCowboyState = {
     height: 300,
     x: 600,
     y: 450,
+    velocity: -5,
+    // stats
     hp: 25,
     maxHp: 25,
+    attackSpeed: 1,
+    // skills
     attack: 1,
-    attackSpeed: 1
 };
 
 export const respawnCowboy = entity => {
@@ -18,10 +21,11 @@ export const respawnCowboy = entity => {
     Position.y[entity] = initialCowboyState.y;
     Size.width[entity] = initialCowboyState.width;
     Size.height[entity] = initialCowboyState.height;
+
     Stats.hp[entity] = initialCowboyState.hp;
     Stats.maxHp[entity] = initialCowboyState.maxHp;
-    Stats.attack[entity] = initialCowboyState.attack;
     Stats.attackSpeed[entity] = initialCowboyState.attackSpeed;
+
     Sprite.texture[entity] = Sprites.Cowboy;
 }
 

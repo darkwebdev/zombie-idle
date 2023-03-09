@@ -1,6 +1,7 @@
 import { addComponent, addEntity } from 'bitecs';
-import { Damage, Input, Player, Position, Size, Sprite, Stats, Velocity } from '../components';
+import { Damage, Input, Player, Position, Size, Skills, Sprite, Stats, Velocity } from '../components';
 import { Sprites } from '../const';
+import { coolDownFromAtkSpeed } from '../systems/helpers';
 
 const initialZombieState = {
     width: 100,
@@ -8,12 +9,17 @@ const initialZombieState = {
     x: 100,
     y: 450,
     velocity: 5,
+    // Stats
     hp: 10,
     maxHp: 10,
-    attack: 10,
     attackSpeed: 1,
     hitChance: 50,
+    // Skills
+    attack: 1,
+    crowdAttack: 0,
+    rangedAttack: 0,
 };
+
 
 export const respawnZombie = entity => {
     Position.x[entity] = initialZombieState.x;
@@ -21,11 +27,16 @@ export const respawnZombie = entity => {
     Size.width[entity] = initialZombieState.width;
     Size.height[entity] = initialZombieState.height;
     Velocity.x[entity] = initialZombieState.velocity;
+
     Stats.hp[entity] = initialZombieState.hp;
     Stats.maxHp[entity] = initialZombieState.maxHp;
-    Stats.attack[entity] = initialZombieState.attack;
     Stats.attackSpeed[entity] = initialZombieState.attackSpeed;
     Stats.hitChance[entity] = initialZombieState.hitChance;
+
+    Skills.attack[entity] = [initialZombieState.attack, coolDownFromAtkSpeed(initialZombieState.attackSpeed)];
+    Skills.crowdAttack[entity] = [initialZombieState.crowdAttack, coolDownFromAtkSpeed(initialZombieState.attackSpeed)];
+    Skills.rangedAttack[entity] = [initialZombieState.rangedAttack, coolDownFromAtkSpeed(initialZombieState.attackSpeed)];
+
     Sprite.texture[entity] = Sprites.Zombie;
 };
 
@@ -36,6 +47,7 @@ export const addZombieEntity = world => {
     addComponent(world, Size, zombie);
     addComponent(world, Velocity, zombie);
     addComponent(world, Stats, zombie);
+    addComponent(world, Skills, zombie);
     addComponent(world, Damage, zombie);
     addComponent(world, Sprite, zombie);
     addComponent(world, Player, zombie);

@@ -8,11 +8,12 @@ import {
     HitMelee,
     Input,
     Player,
-    Position,
+    Position, Skills,
     Sprite,
     Stats
 } from '../components';
-import { isDead } from './helpers';
+import { coolDownFromAtkSpeed, isDead } from './helpers';
+import { HP_PER_ATTACK_LEVEL, SkillProps } from '../const';
 
 export default () => {
     const playerQuery = defineQuery([Player,]);
@@ -23,13 +24,20 @@ export default () => {
     const hitMeleeQueryEnter = enterQuery(hitMeleeQuery);
     const battleQueryEnter = enterQuery(battleQuery);
     const battleQueryExit = exitQuery(battleQuery);
-    const lastHitTimes = new Map();
+    const lastTimeSkillUsed = new Map();
 
-    return defineSystem((world, time) => {
+    return defineSystem((world, time, delta) => {
         const [player] = playerQuery(world);
 
+        const attackEnemyMelee = enemy => {
+            lastTimeSkillUsed.set(player, time);
+            addComponent(world, Attack, player);
+            addComponent(world, AttackedMelee, enemy);
+            AttackedMelee.attacker[enemy] = player;
+        };
+
         battleQueryEnter(world).forEach(entity => {
-            lastHitTimes.set(entity, -Infinity);
+            lastTimeSkillUsed.set(entity, -Infinity);
         });
 
         hitMeleeQueryEnter(world).forEach(entity => {
@@ -45,17 +53,33 @@ export default () => {
                 removeComponent(world, Attack, player);
                 break;
             case 1:
-                if (atMeleeRangeQuery(world).length === 0) {
+                // Meelee
+                const enemiesAtMeleeRange = atMeleeRangeQuery(world);
+                if (enemiesAtMeleeRange.length === 0) {
                     removeComponent(world, Attack, player);
+                } else {
+                    const [crowdAttackLevel, crowdAttackCooldown] = Skills.crowdAttack[player];
+                    if (crowdAttackLevel > 0) {
+                        if (crowdAttackCooldown > 0) {
+                            Skills.crowdAttack[player][SkillProps.Cooldown] -= delta;
+                            console.log('cooldown', crowdAttackCooldown, delta)
+                        } else {
+                            enemiesAtMeleeRange.forEach(attackEnemyMelee);
+                        }
+                    } else {
+                        const [_, attackCooldown] = Skills.attack[player];
+                        if (attackCooldown > 0) {
+                            Skills.attack[player][SkillProps.Cooldown] -= delta;
+                        } else {
+                            console.log('attackEnemyMelee', enemiesAtMeleeRange[0])
+                            attackEnemyMelee(enemiesAtMeleeRange[0]);
+                            Skills.attack[player][SkillProps.Cooldown] = coolDownFromAtkSpeed(Stats.attackSpeed[player]);
+                        }
+                    }
                 }
-                if (time > lastHitTimes.get(player) + 1000 / Stats.attackSpeed[player]) {
-                    atMeleeRangeQuery(world).forEach(enemy => {
-                        lastHitTimes.set(player, time);
-                        addComponent(world, Attack, player);
-                        addComponent(world, AttackedMelee, enemy);
-                        AttackedMelee.attacker[enemy] = player;
-                    });
-                }
+
+                // Ranged
+                // not implemented yet
                 break;
             default:
                 // not implemented
@@ -70,7 +94,7 @@ export default () => {
 
         battleQueryExit(world).forEach(entity => {
             console.log('Battle: exit', entity)
-            lastHitTimes.delete(entity);
+            lastTimeSkillUsed.delete(entity);
         });
 
         return world;
@@ -79,7 +103,10 @@ export default () => {
 
 const doDamage = (attacker, target) => {
     const random = Math.random();
-    const damage = Stats.attack[attacker] * random * (Stats.hitChance[attacker]/100);
+    const damage = Skills.attack[attacker][SkillProps.Level]
+        * HP_PER_ATTACK_LEVEL
+        * random
+        * (Stats.hitChance[attacker]/100);
     Stats.hp[target] = Stats.hp[target] - damage;
     return damage;
 }
