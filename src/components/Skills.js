@@ -1,8 +1,9 @@
 import { defineComponent, Types } from 'bitecs';
+import { SkillNames } from '../const';
 
 export default defineComponent({
     // name: [level, cooldown]
-    attack: [Types.ui16, Types.ui8],
-    crowdAttack: [Types.ui16, Types.ui8],
-    rangedAttack: [Types.ui16, Types.ui8],
+    [SkillNames.Attack]: [Types.ui16, Types.ui8],
+    [SkillNames.CrowdAttack]: [Types.ui16, Types.ui8],
+    [SkillNames.RangedAttack]: [Types.ui16, Types.ui8],
 });

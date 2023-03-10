@@ -37,6 +37,7 @@ export default (scene, textures) => {
                 })
             spritesByEntity.set(entity, sprite);
             if (entity === player) {
+                sprite.setDepth(1);
                 scene.cameras.main.startFollow(sprite, false, 1, 1, -300, 150);
             }
         });

@@ -37,15 +37,15 @@ export default (scene) => {
             const damageValue = Damage.value[entity];
             const isMiss = Damage.isMiss[entity] === 1;
             const isCrit = Damage.isCritical[entity] === 1;
+            resetDamage(entity);
 
             if (damageValue >= 0 || isMiss) {
                 const damage = isMiss ? 'Miss' : damageValue;
-                console.log('Damage system', damage)
+                console.log('Damage system:', damage)
                 const x = Position.x[entity];
                 const y = Position.y[entity] - Size.height[entity] - 10;
                 const style = isMiss ? missStyle : isCrit ? critStyle : damageStyle;
                 const damageText = scene.add.text(x, y, damage, style);
-                resetDamage(entity);
 
                 scene.tweens.addCounter({
                     from: 0,

@@ -95,7 +95,7 @@ export default (scene) => {
                     .map(name => {
                         const level = Skills[name][player][SkillProps.Level];
                         const cooldown = (Skills[name][player][SkillProps.Cooldown] / 1000).toFixed(1);
-                        return `${name}: ${level} [-${cooldown}]`;
+                        return `${name}: ${level} [${cooldown}]`;
                     })
                     .join('\n'),
             ]);

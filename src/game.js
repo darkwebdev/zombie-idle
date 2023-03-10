@@ -8,7 +8,7 @@ import {
     createSpriteSystem,
     createHealthBarSystem,
     createDebugSystem,
-    createDamageDisplaySystem,
+    createDamageDisplaySystem, createSkillSystem,
 } from './systems';
 import { createZombieAnims, addZombieEntity, respawnZombie, } from './entities/Zombie';
 import { createCowboyAnims, addCowboyEntity, respawnCowboy } from './entities/Cowboy';
@@ -49,6 +49,7 @@ export class IdleZombie extends Scene {
         this.playerSystem = createPlayerSystem();
         this.movementSystem = createMovementSystem();
         this.battleSystem = createBattleSystem();
+        this.skillSystem = createSkillSystem();
         this.healthBarSystem = createHealthBarSystem(this);
         this.damageDisplaySystem = createDamageDisplaySystem(this);
         this.spriteSystem = createSpriteSystem(this, Object.keys(Sprites).map(s => s.toLowerCase()));
@@ -68,6 +69,7 @@ export class IdleZombie extends Scene {
         this.playerSystem(this.world);
         this.movementSystem(this.world);
         this.battleSystem(this.world, time, delta);
+        this.skillSystem(this.world, time, delta);
         this.healthBarSystem(this.world);
         this.damageDisplaySystem(this.world);
         this.spriteSystem(this.world);

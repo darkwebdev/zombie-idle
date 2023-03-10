@@ -14,7 +14,13 @@ import {
     Stats
 } from '../components';
 import { coolDownFromAtkSpeed, isDead } from './helpers';
-import { ATTACK_DEVIATION_PERCENT, HP_PER_ATTACK_LEVEL, SkillProps } from '../const';
+import {
+    ATTACK_DEVIATION_PERCENT,
+    CROWD_ATTACK_COOLDOWN_MULTIPLIER,
+    HP_PER_ATTACK_LEVEL,
+    SkillNames,
+    SkillProps
+} from '../const';
 
 export default () => {
     const playerQuery = defineQuery([Player,]);
@@ -38,11 +44,15 @@ export default () => {
         };
 
         hitMeleeQueryEnter(world).forEach(entity => {
-            console.log('Battle: Hit Melee!')
             removeComponent(world, AttackedMelee, entity);
             removeComponent(world, HitMelee, entity);
-            const damage = doDamage(player, entity);
+            const damage = damageInflicted(player, entity);
+            console.log(`Battle: Hit Melee! Enemy: ${entity}(${Stats.hp[entity]}) Damage: ${damage.value}`)
             showDamage(entity, damage);
+
+            if (damage.value > 0) {
+                Stats.hp[entity] = Stats.hp[entity] - damage.value;
+            }
         });
 
         switch (Input.speed[player]) {
@@ -50,28 +60,22 @@ export default () => {
                 removeComponent(world, Attack, player);
                 break;
             case 1:
-                // Meelee
+                // Melee
                 const enemiesAtMeleeRange = atMeleeRangeQuery(world);
                 if (enemiesAtMeleeRange.length === 0) {
                     removeComponent(world, Attack, player);
                 } else {
-                    const [crowdAttackLevel, crowdAttackCooldown] = Skills.crowdAttack[player];
-                    if (crowdAttackLevel > 0) {
-                        if (crowdAttackCooldown > 0) {
-                            Skills.crowdAttack[player][SkillProps.Cooldown] -= delta;
-                            console.log('cooldown', crowdAttackCooldown, delta)
-                        } else {
-                            enemiesAtMeleeRange.forEach(attackEnemyMelee);
-                        }
-                    } else {
-                        const [_, attackCooldown] = Skills.attack[player];
-                        if (attackCooldown > 0) {
-                            Skills.attack[player][SkillProps.Cooldown] -= delta;
-                        } else {
-                            console.log('attackEnemyMelee', enemiesAtMeleeRange[0])
-                            attackEnemyMelee(enemiesAtMeleeRange[0]);
-                            Skills.attack[player][SkillProps.Cooldown] = coolDownFromAtkSpeed(Stats.attackSpeed[player]);
-                        }
+                    const crowdAttacked = trySkill({
+                        skill: Skills[SkillNames.CrowdAttack][player],
+                        skillFn: () => enemiesAtMeleeRange.forEach(attackEnemyMelee),
+                        cooldown: coolDownFromAtkSpeed(Stats.attackSpeed[player]) * CROWD_ATTACK_COOLDOWN_MULTIPLIER,
+                    });
+                    if (!crowdAttacked) {
+                        trySkill({
+                            skill: Skills[SkillNames.Attack][player],
+                            skillFn: () => attackEnemyMelee(enemiesAtMeleeRange[0]),
+                            cooldown: coolDownFromAtkSpeed(Stats.attackSpeed[player]),
+                        });
                     }
                 }
 
@@ -84,6 +88,7 @@ export default () => {
 
         battleQuery(world).forEach(entity => {
             if (isDead(entity)) {
+                console.log('Dead:', entity, Stats.hp[entity])
                 addComponent(world, Dead, entity);
                 removeComponent(world, AtMeleeRange, entity);
             }
@@ -93,7 +98,7 @@ export default () => {
     });
 }
 
-const doDamage = (attacker, target) => {
+const damageInflicted = (attacker, target) => {
     const missed = Stats.hitChance[attacker] < 100 && Math.random() * 100 > Stats.hitChance[attacker];
 
     if (missed) {
@@ -108,8 +113,6 @@ const doDamage = (attacker, target) => {
     const critMultiplier = criticalMultiplier(attacker, target);
     const damage = Math.ceil((minAttack + randomDeviation) * critMultiplier);
 
-    Stats.hp[target] = Stats.hp[target] - damage;
-
     return {
         value: damage,
         isCritical: critMultiplier > 1,
@@ -123,7 +126,16 @@ const showDamage = (entity, damage) => {
 }
 
 const criticalMultiplier = (attacker, target) => {
-    const isCritical = Stats.criticalChance[attacker] < 100 && Math.random() * 100 <= Stats.criticalChance[attacker];
+    const isCritical = Stats.criticalChance[attacker] === 100 || Math.random() * 100 <= Stats.criticalChance[attacker];
 
     return isCritical ? Stats.criticalDamage[attacker] / 100 : 1;
+}
+
+const trySkill = ({ skill, skillFn, cooldown }) => {
+    if (skill[SkillProps.Level] < 1 || skill[SkillProps.Cooldown] > 0) {
+        return false;
+    }
+    skillFn();
+    skill[SkillProps.Cooldown] = cooldown;
+    return true;
 }

@@ -1,7 +1,6 @@
 import { addComponent, addEntity } from 'bitecs';
 import { Damage, Input, Player, Position, Size, Skills, Sprite, Stats, Velocity } from '../components';
 import { Sprites } from '../const';
-import { coolDownFromAtkSpeed } from '../systems/helpers';
 
 const initialZombieState = {
     width: 100,
@@ -18,7 +17,7 @@ const initialZombieState = {
     criticalDamage: 300,
     // Skills
     attack: 1,
-    crowdAttack: 0,
+    crowdAttack: 1,
     rangedAttack: 0,
 };
 
@@ -37,9 +36,9 @@ export const respawnZombie = entity => {
     Stats.criticalChance[entity] = initialZombieState.criticalChance;
     Stats.criticalDamage[entity] = initialZombieState.criticalDamage;
 
-    Skills.attack[entity] = [initialZombieState.attack, coolDownFromAtkSpeed(initialZombieState.attackSpeed)];
-    Skills.crowdAttack[entity] = [initialZombieState.crowdAttack, coolDownFromAtkSpeed(initialZombieState.attackSpeed)];
-    Skills.rangedAttack[entity] = [initialZombieState.rangedAttack, coolDownFromAtkSpeed(initialZombieState.attackSpeed)];
+    Skills.attack[entity] = [initialZombieState.attack, 0];
+    Skills.crowdAttack[entity] = [initialZombieState.crowdAttack, 0];
+    Skills.rangedAttack[entity] = [initialZombieState.rangedAttack, 0];
 
     Sprite.texture[entity] = Sprites.Zombie;
 };
