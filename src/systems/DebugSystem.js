@@ -49,7 +49,7 @@ export default (scene) => {
     });
     scene.input.keyboard.on('keydown-D', () => {
         if (scene.cursors.shift.isDown) {
-            Damage.value[enemy] = 300;
+            Damage.value[enemy] = Math.random() * 100;
         } else {
             Stats.criticalDamage[player] += 10;
         }

@@ -10,7 +10,7 @@ const damageStyle = {
 };
 const missStyle = {
     ...damageStyle,
-    fontSize: '30px',
+    fontSize: '20px',
     color: '#aaaaaa',
 };
 const critStyle = {
@@ -25,9 +25,19 @@ const resetDamage = entity => {
     Damage.isCritical[entity] = 0;
 }
 
+const avoidOverlapping = (minPos, curText) => {
+    console.log('DMG trying', minPos.x, minPos.y, curText.x, curText.y);
+    const curTextRight = curText.x + curText.width + 10;
+    const curTextBottom = curText.y + curText.height - 10;
+    const overlappingX = curTextRight >= minPos.x;
+    const overlappingY = curTextBottom >= minPos.y;
+    return (overlappingX && overlappingY) ? { x: curTextRight, y: minPos.y } : minPos;
+};
+
 export default (scene) => {
     const damageQuery = defineQuery([Damage, Position, Size,]);
     const damageQueryEnter = enterQuery(damageQuery);
+    const textQ = [];
 
     return defineSystem((world) => {
         damageQueryEnter(world).forEach(entity => {
@@ -46,10 +56,14 @@ export default (scene) => {
                 const y = Position.y[entity] - Size.height[entity] - 10;
                 const style = isMiss ? missStyle : isCrit ? critStyle : damageStyle;
                 const damageText = scene.add.text(x, y, damage, style);
+                const freePos = textQ.reduce(avoidOverlapping, { x, y });
+                damageText.setX(freePos.x).setY(freePos.y);
+                textQ.push(damageText);
+                // console.log('DMG Q', textQ.map(text => text.text), freePos.x, freePos.y);
 
                 scene.tweens.addCounter({
                     from: 0,
-                    to: 1,
+                    to: 100,
                     ease: 'linear',
                     duration: 2000,
                     repeat: 0,
@@ -57,8 +71,13 @@ export default (scene) => {
                     onUpdate: tween => {
                         const counter = tween.getValue();
                         damageText
-                            .setY(y-counter*200)
-                            .setAlpha(1-counter);
+                            .setX(freePos.x - (freePos.x - x)/counter)
+                            .setY(y - counter * 2)
+                            .setAlpha(1 - counter/100);
+                    },
+                    onComplete: () => {
+                        textQ.shift();
+                        damageText.destroy();
                     }
                 });
             }
