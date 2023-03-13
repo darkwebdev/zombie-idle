@@ -38,6 +38,10 @@ export default (scene) => {
         Input.debug[player] = 1 - Input.debug[player];
         scene.debugDraw.toggle();
     });
+    scene.input.keyboard.once('keydown-P', () => {
+        scene.scene.pause();
+        console.log('Paused.')
+    });
     scene.input.keyboard.on('keydown-SPACE', () => {
         Input.autoplay[player] = 1 - Input.autoplay[player];
     });
@@ -54,11 +58,18 @@ export default (scene) => {
             Stats.criticalDamage[player] += 10;
         }
     });
-    scene.input.keyboard.on('keydown-R', () => {
+    const respawnEnemy = () => {
         enemy = addCowboyEntity(scene.world);
         respawnCowboy(enemy);
         Position.x[enemy] = Position.x[player] + scene.scale.width - 100;
         console.log('Respawn enemy at x:', Position.x[enemy]);
+    };
+    scene.input.keyboard.on('keydown-R', () => {
+        if (scene.cursors.shift.isDown) {
+            for (let i = 0; i < 10; i++) respawnEnemy();
+        } else {
+            respawnEnemy();
+        }
     });
 
     return defineSystem((world) => {

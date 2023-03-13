@@ -8,7 +8,8 @@ import {
     createSpriteSystem,
     createHealthBarSystem,
     createDebugSystem,
-    createDamageDisplaySystem, createSkillSystem,
+    createDamageDisplaySystem,
+    createSkillSystem,
 } from './systems';
 import { createZombieAnims, addZombieEntity, respawnZombie, } from './entities/Zombie';
 import { createCowboyAnims, addCowboyEntity, respawnCowboy } from './entities/Cowboy';

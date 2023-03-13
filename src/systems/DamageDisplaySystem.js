@@ -10,7 +10,7 @@ const damageStyle = {
 };
 const missStyle = {
     ...damageStyle,
-    fontSize: '20px',
+    fontSize: '16px',
     color: '#aaaaaa',
 };
 const critStyle = {
@@ -26,7 +26,6 @@ const resetDamage = entity => {
 }
 
 const avoidOverlapping = (minPos, curText) => {
-    console.log('DMG trying', minPos.x, minPos.y, curText.x, curText.y);
     const curTextRight = curText.x + curText.width + 10;
     const curTextBottom = curText.y + curText.height - 10;
     const overlappingX = curTextRight >= minPos.x;
