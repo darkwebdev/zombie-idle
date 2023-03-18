@@ -1,4 +1,4 @@
-export * from './Dimentions';
+export * from './Dimensions';
 export * from './State';
 export * from './AtRange';
 export * from './Melee';

@@ -4,7 +4,7 @@ import { atMeleeRange, isDead } from './helpers';
 
 export default () => {
     const playerQuery = defineQuery([Player,]);
-    const movementQuery = defineQuery([Position, ]);
+    const movementQuery = defineQuery([Position, Velocity,]);
     const atMeleeRangeQuery = defineQuery([AtMeleeRange, ]);
 
     return defineSystem((world) => {
@@ -23,25 +23,23 @@ export default () => {
             if (entity !== player) {
                 if (atMeleeRange(entity, player)) {
                     addComponent(world, AtMeleeRange, entity);
+                    removeComponent(world, Walk, entity);
                 } else if (Velocity.x[entity]){
                     removeComponent(world, AtMeleeRange, entity);
-                    updateAnimatedPosition(world, entity, true);
+                    addComponent(world, Walk, entity);
+                    Position.x[entity] -= Velocity.x[entity];
                 }
             }
         });
 
         const isPlayerWalking = Input.speed[player] === 1 && Velocity.x[player] && !atMeleeRangeQuery(world).length;
-        updateAnimatedPosition(world, player, isPlayerWalking);
+        if (isPlayerWalking) {
+            Position.x[player] += Velocity.x[player];
+            addComponent(world, Walk, player);
+        } else {
+            removeComponent(world, Walk, player);
+        }
 
         return world;
     });
-}
-
-const updateAnimatedPosition = (world, entity, isWalking = false) => {
-    if (isWalking) {
-        Position.x[entity] += Velocity.x[entity];
-        addComponent(world, Walk, entity);
-    } else {
-        removeComponent(world, Walk, entity);
-    }
 }

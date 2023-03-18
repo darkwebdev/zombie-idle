@@ -45,8 +45,12 @@ export default () => {
 
         hitMeleeQueryEnter(world).forEach(entity => {
             removeComponent(world, AttackedMelee, entity);
-            removeComponent(world, HitMelee, entity);
+            // removeComponent(world, HitMelee, entity);
             const damage = damageInflicted(player, entity);
+            if (damage.isMiss) {
+                console.log('MISS')
+                removeComponent(world, HitMelee, entity);
+            }
             console.log(`Battle: Hit Melee! Enemy: ${entity}(${Stats.hp[entity]}) Damage: ${damage.value}`)
             showDamage(entity, damage);
 
@@ -90,6 +94,7 @@ export default () => {
             if (isDead(entity)) {
                 console.log('Dead:', entity, Stats.hp[entity])
                 addComponent(world, Dead, entity);
+                removeComponent(world, HitMelee, entity);
                 removeComponent(world, AtMeleeRange, entity);
             }
         });

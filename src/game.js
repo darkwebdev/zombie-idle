@@ -12,7 +12,7 @@ import {
     createSkillSystem,
 } from './systems';
 import { createZombieAnims, addZombieEntity, respawnZombie, } from './entities/Zombie';
-import { createCowboyAnims, addCowboyEntity, respawnCowboy } from './entities/Cowboy';
+import { addGuardEntity, createGuardAnims, respawnGuard } from './entities/Guard';
 import { createBg } from './bg';
 import { Sprites } from './const';
 
@@ -29,7 +29,7 @@ export class IdleZombie extends Scene {
             }
         }
         this.load.atlas('zombie', 'assets/zombie.png', 'assets/zombie.json');
-        this.load.atlas('cowboy', 'assets/cowboy.png', 'assets/cowboy.json');
+        this.load.atlas('guard', 'assets/guard.png', 'assets/guard.json');
 
         this.cursors = this.input.keyboard.createCursorKeys();
     }
@@ -37,15 +37,15 @@ export class IdleZombie extends Scene {
     create() {
         createBg(this);
         createZombieAnims(this.anims);
-        createCowboyAnims(this.anims);
+        createGuardAnims(this.anims);
 
         // ECS
         this.world = window.world = createWorld();
         this.world.name = 'Zombieland';
         const zombie = addZombieEntity(this.world);
         respawnZombie(zombie);
-        const cowboy = addCowboyEntity(this.world);
-        respawnCowboy(cowboy);
+        const soldier = addGuardEntity(this.world);
+        respawnGuard(soldier);
 
         this.playerSystem = createPlayerSystem();
         this.movementSystem = createMovementSystem();

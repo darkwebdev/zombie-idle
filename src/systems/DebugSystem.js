@@ -1,9 +1,9 @@
-import { defineQuery, defineSystem, hasComponent, Not } from 'bitecs';
+import { addComponent, defineQuery, defineSystem, hasComponent, Not, removeComponent } from 'bitecs';
 import {
     Attack,
     AttackedMelee,
     Damage,
-    Dead,
+    Dead, HitMelee,
     Input,
     Player,
     Position,
@@ -12,8 +12,8 @@ import {
     Velocity,
     Walk
 } from '../components';
-import { addCowboyEntity, respawnCowboy } from '../entities/Cowboy';
 import { SkillProps } from '../const';
+import { addGuardEntity, respawnGuard } from '../entities/Guard';
 
 const style = {
     font: '16px Courier',
@@ -38,9 +38,42 @@ export default (scene) => {
         Input.debug[player] = 1 - Input.debug[player];
         scene.debugDraw.toggle();
     });
-    scene.input.keyboard.once('keydown-P', () => {
+    scene.input.keyboard.on('keydown-P', () => {
         scene.scene.pause();
         console.log('Paused.')
+    });
+    let state = 0;
+    scene.input.keyboard.on('keydown-S', () => {
+        switch (state) {
+            case 0:
+                console.log('Changing state to walking...')
+                addComponent(world, Walk, enemy);
+                state = 1;
+                break;
+            case 1:
+                console.log('Changing state to attacking...')
+                removeComponent(world, Walk, enemy);
+                addComponent(world, Attack, enemy);
+                state = 2;
+                break;
+            case 2:
+                console.log('Changing state to hit...')
+                removeComponent(world, Attack, enemy);
+                addComponent(world, HitMelee, enemy);
+                state = 3;
+                break;
+            case 3:
+                console.log('Changing state to dying...')
+                removeComponent(world, HitMelee, enemy);
+                addComponent(world, Dead, enemy);
+                state = 4;
+                break;
+            default:
+                console.log('Changing state to idle...')
+                // removeComponent(world, Dead, enemy);
+                state = 0;
+                break;
+        }
     });
     scene.input.keyboard.on('keydown-SPACE', () => {
         Input.autoplay[player] = 1 - Input.autoplay[player];
@@ -59,8 +92,8 @@ export default (scene) => {
         }
     });
     const respawnEnemy = () => {
-        enemy = addCowboyEntity(scene.world);
-        respawnCowboy(enemy);
+        enemy = addGuardEntity(scene.world);
+        respawnGuard(enemy);
         Position.x[enemy] = Position.x[player] + scene.scale.width - 100;
         console.log('Respawn enemy at x:', Position.x[enemy]);
     };
@@ -87,6 +120,7 @@ export default (scene) => {
                 hasComponent(world, Walk, entity) && 'Walk' ||
                 hasComponent(world, Attack, entity) && 'Attack' ||
                 hasComponent(world, Dead, entity) && 'Dead' ||
+                hasComponent(world, HitMelee, entity) && 'Hit' ||
                 'Idle'
             ;
 

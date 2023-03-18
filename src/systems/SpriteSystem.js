@@ -1,6 +1,16 @@
-import { addComponent, defineQuery, defineSystem, enterQuery, exitQuery, Not, removeEntity } from 'bitecs';
+import {
+    addComponent,
+    defineQuery,
+    defineSystem,
+    enterQuery,
+    exitQuery,
+    Not,
+    removeComponent,
+    removeEntity
+} from 'bitecs';
 import { Attack, AttackedMelee, Dead, HitMelee, Input, Player, Position, Sprite, Stats, Walk } from '../components';
 import { ATTACK_HIT_FRAME } from '../entities/Zombie';
+import { DEAD_ANIM_ADJUST_Y, HIT_ANIM_ADJUST_X } from '../entities/Guard';
 
 const timeScale = 1;
 
@@ -10,7 +20,10 @@ export default (scene, textures) => {
     const walkQuery = defineQuery([Walk,]);
     const attackQuery = defineQuery([Attack,]);
     const deadQuery = defineQuery([Dead,]);
-    const idleQuery = defineQuery([Not(Dead), Not(Walk), Not(Attack),]);
+    const idleQuery = defineQuery([Not(Dead), Not(Walk), Not(Attack), Not(HitMelee),]);
+    const hitMeleeQuery = defineQuery([HitMelee,]);
+    const hitMeleeQueryEnter = enterQuery(hitMeleeQuery);
+    const hitMeleeQueryExit = exitQuery(hitMeleeQuery);
     const attackedMeleeQuery = defineQuery([AttackedMelee,]);
     const attackedMeleeQueryEnter = enterQuery(attackedMeleeQuery);
     const attackedMeleeQueryExit = exitQuery(attackedMeleeQuery);
@@ -29,6 +42,11 @@ export default (scene, textures) => {
                 .sprite(0, 0, textureName)
                 .setScale(0.5)
                 .setOrigin(0.5, 1)
+                .setDepth(1)
+                .setFlipX(Sprite.isFlipped[entity] === 1)
+                // .on(Phaser.Animations.Events.ANIMATION_UPDATE, (anim, frame) => {
+                //     entity !== player && console.log('ANIMATION_UPDATE', anim.key, entity)
+                // })
                 .setInteractive()
                 .on(Phaser.Input.Events.POINTER_DOWN, () => {
                     if (Input.debug[player]) {
@@ -37,16 +55,16 @@ export default (scene, textures) => {
                 })
             spritesByEntity.set(entity, sprite);
             if (entity === player) {
-                sprite.setDepth(1);
+                sprite.setDepth(5);
                 scene.cameras.main.startFollow(sprite, false, 1, 1, -300, 150);
             }
         });
 
         spriteQueryExit(world).forEach(entity => {
-            console.log('SPRITE: exit', entity)
             const sprite = spritesByEntity.get(entity);
             sprite.off(Phaser.Input.Events.POINTER_DOWN);
             spritesByEntity.delete(entity);
+            console.log('Sprite system: exit', entity, ', left', spritesByEntity.size, 'sprites.');
         });
 
         spriteQuery(world).forEach(entity => {
@@ -60,11 +78,7 @@ export default (scene, textures) => {
 
         walkQuery(world).forEach(entity => {
             const textureName = textureNameByEntity(entity);
-            const sprite = spritesByEntity.get(entity);
-
-            if (sprite) {
-                sprite.play({ key: `${textureName}Walk`, timeScale }, true);
-            }
+            spritesByEntity.get(entity)?.play({ key: `${textureName}Walk`, timeScale }, true);
         });
 
         attackedMeleeQueryExit(world).forEach(entity => {
@@ -83,6 +97,31 @@ export default (scene, textures) => {
                 });
         });
 
+        hitMeleeQueryEnter(world).forEach(entity => {
+            console.log('HIT QUERY ENTER', entity)
+            spritesByEntity
+                .get(entity)
+                ?.on(Phaser.Animations.Events.ANIMATION_COMPLETE, (anim) => {
+                    console.log('remove HitMelee', entity, anim)
+                    removeComponent(world, HitMelee, entity);
+                });
+        });
+        hitMeleeQueryExit(world).forEach(entity => {
+            console.log('HIT QUERY exit', entity)
+            spritesByEntity.get(entity)?.stop();
+        });
+        hitMeleeQuery(world).forEach(entity => {
+            const textureName = textureNameByEntity(entity);
+            const sprite = spritesByEntity.get(entity);
+            if (sprite) {
+                console.log('HIT QUERY', entity, textureName)
+                sprite
+                    .setX(sprite.x + HIT_ANIM_ADJUST_X)
+                    .setY(sprite.y + DEAD_ANIM_ADJUST_Y)
+                    .play({ key: `${textureName}Hit`, timeScale }, true);
+            }
+        });
+
         attackQuery(world).forEach(entity => {
             const textureName = textureNameByEntity(entity);
             spritesByEntity.get(entity)?.play({
@@ -93,12 +132,15 @@ export default (scene, textures) => {
 
         deadQuery(world).forEach(entity => {
             const textureName = textureNameByEntity(entity);
-            spritesByEntity
-                .get(entity)
+            const sprite = spritesByEntity.get(entity);
+            sprite
                 ?.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
                     // removeComponent(world, Dead, entity);
+                    sprite.setDepth(0);
+                    console.log('Removing dead entity', entity);
                     removeEntity(world, entity);
                 })
+                .setY(sprite.y + DEAD_ANIM_ADJUST_Y)
                 .play({ key: `${textureName}Dead`, timeScale }, true);
         });
 

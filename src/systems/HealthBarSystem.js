@@ -49,7 +49,7 @@ export default (scene) => {
                         .length;
                     const adjustedBarY = barY(y) + (BAR_HEIGHT+2) * overlappingBarsNumber;
                     bar.setY(adjustedBarY);
-                    console.log('y', adjustedBarY, 'barX', barX(x), entity)
+                    // console.log('y', adjustedBarY, 'barX', barX(x), entity)
                 }
                 // drawBarBg(freeX, y).setScrollFactor(scrollFactorX, 0);
                 bars.set(entity, bar);
@@ -66,7 +66,7 @@ export default (scene) => {
                     const index = overlappingBars.indexOf(entity);
                     if (index > -1) {
                         const adjustedBarY = barY(Position.y[entity]) + (BAR_HEIGHT+2) * index;
-                        bar.setY(adjustedBarY);
+                        bar.setX(barX(Position.x[entity])).setY(adjustedBarY);
                     }
                 }
                 bar.setScale(clamp(Stats.hp[entity]) / Stats.maxHp[entity], 1);

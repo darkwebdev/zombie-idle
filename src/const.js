@@ -1,6 +1,8 @@
 export const Sprites = {
     Zombie: 0,
-    Cowboy: 1,
+    Soldier: 1,
+    Recruit: 2,
+    Guard: 3,
 };
 
 export const SkillProps = {

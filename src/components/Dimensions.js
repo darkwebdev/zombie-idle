@@ -1,7 +1,7 @@
 import { defineComponent, Types } from 'bitecs';
 
 export const Position = defineComponent({
-    x: Types.ui32,
+    x: Types.i32,
     y: Types.ui16,
 });
 
