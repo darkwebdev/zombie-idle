@@ -1,4 +1,5 @@
 import { Game, AUTO } from 'phaser';
+import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import DebugDrawPlugin from 'phaser-plugin-debug-draw';
 import { IdleZombie } from './game';
 
@@ -19,13 +20,18 @@ const config = {
     plugins: {
         scene: [
             {
+                key: 'rexUI',
+                plugin: UIPlugin,
+                mapping: 'rexUI'
+            },
+            {
                 key: 'DebugDrawPlugin',
                 plugin: DebugDrawPlugin,
                 mapping: 'debugDraw'
             }
         ]
     },
-    scene: IdleZombie
+    scene: [IdleZombie]
 };
 
 window.game = new Game(config);

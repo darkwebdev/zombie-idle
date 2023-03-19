@@ -15,6 +15,7 @@ import { createZombieAnims, addZombieEntity, respawnZombie, } from './entities/Z
 import { addGuardEntity, createGuardAnims, respawnGuard } from './entities/Guard';
 import { createBg } from './bg';
 import { Sprites } from './const';
+import { showPreloader } from './preloader';
 
 export class IdleZombie extends Scene {
     constructor() {
@@ -22,6 +23,8 @@ export class IdleZombie extends Scene {
     }
 
     preload() {
+        showPreloader(this);
+
         this.load.image('sky', 'assets/bg/1/Night/1.png');
         for (let line = 0; line < 4; line++) {
             for (let screen = 0; screen < 8; screen++) {
