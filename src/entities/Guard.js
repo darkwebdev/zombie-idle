@@ -6,8 +6,8 @@ export const DEAD_ANIM_ADJUST_Y = 10;
 export const HIT_ANIM_ADJUST_X = 40;
 
 const initialGuardState = {
-    width: 100,
-    height: 300,
+    width: 50,
+    height: 150,
     x: 600,
     y: 450,
     velocity: 1,

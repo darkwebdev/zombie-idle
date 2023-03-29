@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import {
     addComponent,
     defineQuery,
@@ -40,7 +41,7 @@ export default (scene, textures) => {
             const textureName = textureNameByEntity(entity);
             const sprite = scene.add
                 .sprite(0, 0, textureName)
-                .setScale(0.5)
+                .setScale(0.25)
                 .setOrigin(0.5, 1)
                 .setDepth(1)
                 .setFlipX(Sprite.isFlipped[entity] === 1)
@@ -101,8 +102,7 @@ export default (scene, textures) => {
             console.log('HIT QUERY ENTER', entity)
             spritesByEntity
                 .get(entity)
-                ?.on(Phaser.Animations.Events.ANIMATION_COMPLETE, (anim) => {
-                    console.log('remove HitMelee', entity, anim)
+                ?.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
                     removeComponent(world, HitMelee, entity);
                 });
         });

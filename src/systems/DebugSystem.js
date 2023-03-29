@@ -24,6 +24,12 @@ const colXs = [10, 160, 360, 550, 750];
 let enemy = 1;
 
 export default (scene) => {
+    scene.debugDraw.showPointers = false;
+    //showInput
+    //showInactivePointers
+    //showRotation
+    //showLights
+
     const [player] = defineQuery([Player,])(scene.world);
     const enemiesQuery = defineQuery([Stats, Not(Player),]);
     const attackedMeleeQuery = defineQuery([AttackedMelee,]);
@@ -37,6 +43,7 @@ export default (scene) => {
     scene.input.keyboard.on('keydown-BACKTICK', () => {
         Input.debug[player] = 1 - Input.debug[player];
         scene.debugDraw.toggle();
+        toggleSceneWatcher();
     });
     scene.input.keyboard.on('keydown-P', () => {
         scene.scene.pause();
@@ -162,5 +169,11 @@ export default (scene) => {
         }
 
         return world;
+    });
+}
+
+function toggleSceneWatcher() {
+    document.querySelectorAll('body > pre').forEach(el => {
+        el.style.display = el.style.display === 'none' ? '' : 'none';
     });
 }

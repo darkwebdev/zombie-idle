@@ -10,29 +10,27 @@ import {
     createDebugSystem,
     createDamageDisplaySystem,
     createSkillSystem,
-} from './systems';
-import { createZombieAnims, addZombieEntity, respawnZombie, } from './entities/Zombie';
-import { addGuardEntity, createGuardAnims, respawnGuard } from './entities/Guard';
-import { createBg } from './bg';
-import { Sprites } from './const';
-import { showPreloader } from './preloader';
+} from '../systems';
+import { MainMenu } from './common/menu';
+import { createZombieAnims, addZombieEntity, respawnZombie, } from '../entities/Zombie';
+import { addRecruitEntity, createRecruitAnims, respawnRecruit } from '../entities/Recruit';
+import { createBg, loadBg } from './common/nightCity';
+import { Sprites } from '../const';
+import { showPreloader } from './common/preloader';
+import { loadUi } from './common/ui';
 
-export class IdleZombie extends Scene {
+export class RecruitLevel extends Scene {
     constructor() {
-        super();
+        super('recruitLevel');
     }
 
     preload() {
         showPreloader(this);
 
-        this.load.image('sky', 'assets/bg/1/Night/1.png');
-        for (let line = 0; line < 4; line++) {
-            for (let screen = 0; screen < 8; screen++) {
-                this.load.image(`building${line}${screen}`, `assets/bg/${screen + 1}/Night/${line + 2}.png`);
-            }
-        }
+        loadBg(this);
+        loadUi(this);
         this.load.atlas('zombie', 'assets/zombie.png', 'assets/zombie.json');
-        this.load.atlas('guard', 'assets/guard.png', 'assets/guard.json');
+        this.load.atlas('recruit', 'assets/recruit.png', 'assets/recruit.json');
 
         this.cursors = this.input.keyboard.createCursorKeys();
     }
@@ -40,15 +38,17 @@ export class IdleZombie extends Scene {
     create() {
         createBg(this);
         createZombieAnims(this.anims);
-        createGuardAnims(this.anims);
+        createRecruitAnims(this.anims);
+        MainMenu(this);
+
 
         // ECS
         this.world = window.world = createWorld();
         this.world.name = 'Zombieland';
         const zombie = addZombieEntity(this.world);
         respawnZombie(zombie);
-        const soldier = addGuardEntity(this.world);
-        respawnGuard(soldier);
+        const soldier = addRecruitEntity(this.world);
+        respawnRecruit(soldier);
 
         this.playerSystem = createPlayerSystem();
         this.movementSystem = createMovementSystem();
@@ -59,12 +59,6 @@ export class IdleZombie extends Scene {
         this.spriteSystem = createSpriteSystem(this, Object.keys(Sprites).map(s => s.toLowerCase()));
         this.debugSystem = createDebugSystem(this);
 
-        // Collisions
-        // const enemies = this.physics.add.group();
-        // enemies.create(0, 0, 'cowboy').setScale(0.5).refreshBody();
-        // this.physics.add.collider(this.zombie, this.cowboy, () => {
-        //     console.log('COLLIDE!');
-        // });
     }
 
     update(time, delta) {

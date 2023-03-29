@@ -1,7 +1,9 @@
 import { Game, AUTO } from 'phaser';
 import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import DebugDrawPlugin from 'phaser-plugin-debug-draw';
-import { IdleZombie } from './game';
+import SceneWatcherPlugin from 'phaser-plugin-scene-watcher';
+import { GuardLevel } from './scenes/guard';
+import { RecruitLevel } from './scenes/recruit';
 
 const config = {
     type: AUTO,
@@ -18,6 +20,13 @@ const config = {
         },
     },
     plugins: {
+        global: [
+            {
+                key: 'SceneWatcher',
+                plugin: SceneWatcherPlugin,
+                start: true
+            }
+        ],
         scene: [
             {
                 key: 'rexUI',
@@ -31,7 +40,16 @@ const config = {
             }
         ]
     },
-    scene: [IdleZombie]
+    callbacks: {
+        postBoot: function(game) {
+            // For each scene, it shows (left to right):
+            // key, status, display list count, update list count,
+            // active (a), visible (v), transitioning (t),
+            // input active (i), keyboard input active (k)
+            game.plugins.get('SceneWatcher').watchAll();
+        }
+    },
+    scene: [GuardLevel, RecruitLevel]
 };
 
 window.game = new Game(config);
