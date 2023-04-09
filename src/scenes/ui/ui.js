@@ -19,7 +19,7 @@ export const createUI = (scene, menu) => {
 
     addMenuButton('gear_white.png', () => {
         console.log('MENU')
-        menu.setVisible(true);
+        menu.open();
     })
 
     scene.add
