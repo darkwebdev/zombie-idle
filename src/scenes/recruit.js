@@ -11,17 +11,17 @@ import {
     createDamageDisplaySystem,
     createSkillSystem,
 } from '../systems';
-import { MainMenu } from './common/menu';
-import { createZombieAnims, addZombieEntity, respawnZombie, } from '../entities/Zombie';
-import { addRecruitEntity, createRecruitAnims, respawnRecruit } from '../entities/Recruit';
+import { MainMenu } from './ui/menu';
+import { createZombieAnims, addZombieEntity, respawnZombie, loadZombieAtlas, } from '../entities/Zombie';
+import { addRecruitEntity, createRecruitAnims, loadRecruitAtlas, respawnRecruit } from '../entities/Recruit';
 import { createBg, loadBg } from './common/nightCity';
-import { Sprites } from '../const';
+import { Levels, Sprites } from '../const';
 import { showPreloader } from './common/preloader';
-import { loadUi } from './common/ui';
+import { createUI, loadUi } from './ui/ui';
 
 export class RecruitLevel extends Scene {
     constructor() {
-        super('recruitLevel');
+        super(Levels.Recruit);
     }
 
     preload() {
@@ -29,17 +29,17 @@ export class RecruitLevel extends Scene {
 
         loadBg(this);
         loadUi(this);
-        this.load.atlas('zombie', 'assets/zombie.png', 'assets/zombie.json');
-        this.load.atlas('recruit', 'assets/recruit.png', 'assets/recruit.json');
+        loadZombieAtlas(this);
+        loadRecruitAtlas(this);
 
         this.cursors = this.input.keyboard.createCursorKeys();
     }
 
     create() {
         createBg(this);
+        createUI(this, MainMenu(this));
         createZombieAnims(this.anims);
         createRecruitAnims(this.anims);
-        MainMenu(this);
 
 
         // ECS

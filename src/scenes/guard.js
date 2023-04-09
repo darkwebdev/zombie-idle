@@ -3,25 +3,25 @@ import { createWorld } from 'bitecs';
 
 import {
     createBattleSystem,
+    createDamageDisplaySystem,
+    createDebugSystem,
+    createHealthBarSystem,
     createMovementSystem,
     createPlayerSystem,
-    createSpriteSystem,
-    createHealthBarSystem,
-    createDebugSystem,
-    createDamageDisplaySystem,
     createSkillSystem,
+    createSpriteSystem,
 } from '../systems';
-import { MainMenu } from './common/menu';
-import { createZombieAnims, addZombieEntity, respawnZombie, } from '../entities/Zombie';
-import { addGuardEntity, createGuardAnims, respawnGuard } from '../entities/Guard';
+import { MainMenu } from './ui/menu';
+import { addZombieEntity, createZombieAnims, loadZombieAtlas, respawnZombie, } from '../entities/Zombie';
+import { addGuardEntity, createGuardAnims, loadGuardAtlas, respawnGuard } from '../entities/Guard';
 import { createBg, loadBg } from './common/nightCity';
-import { Sprites } from '../const';
+import { Levels, Sprites } from '../const';
 import { showPreloader } from './common/preloader';
-import { loadUi } from './common/ui';
+import { createUI, loadUi } from './ui/ui';
 
 export class GuardLevel extends Scene {
     constructor() {
-        super('guardLevel');
+        super(Levels.Guard);
     }
 
     preload() {
@@ -29,17 +29,17 @@ export class GuardLevel extends Scene {
 
         loadBg(this);
         loadUi(this);
-        this.load.atlas('zombie', 'assets/zombie.png', 'assets/zombie.json');
-        this.load.atlas('guard', 'assets/guard.png', 'assets/guard.json');
+        loadZombieAtlas(this);
+        loadGuardAtlas(this);
 
         this.cursors = this.input.keyboard.createCursorKeys();
     }
 
     create() {
         createBg(this);
+        createUI(this, MainMenu(this));
         createZombieAnims(this.anims);
         createGuardAnims(this.anims);
-        MainMenu(this);
 
 
         // ECS

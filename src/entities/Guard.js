@@ -47,6 +47,10 @@ export const addGuardEntity = world => {
     return entity;
 };
 
+export const loadGuardAtlas = scene => {
+    scene.load.atlas('guard', 'assets/guard.png', 'assets/guard.json');
+};
+
 export const createGuardAnims = (anims) => {
     anims.create({
         key: 'guardIdle',

@@ -46,6 +46,10 @@ export const addRecruitEntity = world => {
     return entity;
 };
 
+export const loadRecruitAtlas = scene => {
+    scene.load.atlas('recruit', 'assets/recruit.png', 'assets/recruit.json');
+};
+
 export const createRecruitAnims = (anims) => {
     anims.create({
         key: 'soldierIdle',

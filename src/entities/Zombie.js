@@ -59,6 +59,10 @@ export const addZombieEntity = world => {
     return zombie;
 };
 
+export const loadZombieAtlas = scene => {
+    scene.load.atlas('zombie', 'assets/zombie.png', 'assets/zombie.json');
+};
+
 export const createZombieAnims = (anims) => {
     anims.create({
         key: 'zombieIdle',

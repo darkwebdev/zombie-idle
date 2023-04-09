@@ -14,7 +14,12 @@ export const SkillNames = {
     Attack: 'attack',
     CrowdAttack: 'crowdAttack',
     RangedAttack: 'rangedAttack',
-}
+};
+
+export const Levels = {
+    Guard: 'guardLevel',
+    Recruit: 'recruitLevel',
+};
 
 export const MELEE_ATTACK_RANGE = 150;
 export const RANGED_ATTACK_RANGE = 400;

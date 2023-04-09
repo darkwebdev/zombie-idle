@@ -1,4 +1,4 @@
-import { Game, AUTO } from 'phaser';
+import Phaser, { Game } from 'phaser';
 import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import DebugDrawPlugin from 'phaser-plugin-debug-draw';
 import SceneWatcherPlugin from 'phaser-plugin-scene-watcher';
@@ -6,7 +6,7 @@ import { GuardLevel } from './scenes/guard';
 import { RecruitLevel } from './scenes/recruit';
 
 const config = {
-    type: AUTO,
+    type: Phaser.AUTO,
     parent: 'phaser-example',
     width: 800,
     height: 600,

@@ -3108,10 +3108,10 @@ phaser3-rex-plugins@^1.1.83:
     papaparse "^5.3.2"
     webfontloader "^1.6.28"
 
-phaser@^3.60.0-beta.19:
-  version "3.60.0-beta.19"
-  resolved "https://registry.yarnpkg.com/phaser/-/phaser-3.60.0-beta.19.tgz#6828d740d8bbdc064cd8ae7c6e8d5f172cd00153"
-  integrity sha512-2pWZcS9QpieUzORHq5ZvNzzX//9fB9+A8HbPqDTYtZywWT95OVe18hmWIRFG0BUJ9JzezPmWU1tRcNSSvUKRmA==
+phaser@^3.60.0-beta.23:
+  version "3.60.0-beta.23"
+  resolved "https://registry.yarnpkg.com/phaser/-/phaser-3.60.0-beta.23.tgz#6e3b589a365097d0fc285a28e632c0013f8573f1"
+  integrity sha512-cpqW93X+Rv3+RdctPJrQobEkEfTvgomqYHB8jrKQrvRR6Uc1z5dTky3eJQI22Bm88FKob9eGMKzFjdeLxuCqBw==
   dependencies:
     eventemitter3 "^5.0.0"
 
