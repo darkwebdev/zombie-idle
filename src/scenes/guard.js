@@ -4,20 +4,19 @@ import { createWorld } from 'bitecs';
 import {
     createBattleSystem,
     createDamageDisplaySystem,
-    createDebugSystem,
+    createUISystem,
     createHealthBarSystem,
     createMovementSystem,
     createPlayerSystem,
     createSkillSystem,
     createSpriteSystem,
 } from '../systems';
-import { MainMenu } from './ui/menu';
-import { addZombieEntity, createZombieAnims, loadZombieAtlas, respawnZombie, } from '../entities/Zombie';
-import { addGuardEntity, createGuardAnims, loadGuardAtlas, respawnGuard } from '../entities/Guard';
+import { createZombie, loadZombieAtlas, respawnZombie, } from '../entities/Zombie';
+import { createGuard, loadGuardAtlas, respawnGuard } from '../entities/Guard';
 import { createBg, loadBg } from './common/nightCity';
 import { Levels, Sprites } from '../const';
 import { showPreloader } from './common/preloader';
-import { createUI, loadUi } from './ui/ui';
+import { loadUi } from './ui/ui';
 
 export class GuardLevel extends Scene {
     constructor() {
@@ -37,18 +36,14 @@ export class GuardLevel extends Scene {
 
     create() {
         createBg(this);
-        createUI(this, MainMenu(this));
-        createZombieAnims(this.anims);
-        createGuardAnims(this.anims);
-
 
         // ECS
         this.world = window.world = createWorld();
         this.world.name = 'Zombieland';
-        const zombie = addZombieEntity(this.world);
+        const zombie = createZombie(this);
         respawnZombie(zombie);
-        const soldier = addGuardEntity(this.world);
-        respawnGuard(soldier);
+        const guard = createGuard(this);
+        respawnGuard(guard);
 
         this.playerSystem = createPlayerSystem();
         this.movementSystem = createMovementSystem();
@@ -57,7 +52,7 @@ export class GuardLevel extends Scene {
         this.healthBarSystem = createHealthBarSystem(this);
         this.damageDisplaySystem = createDamageDisplaySystem(this);
         this.spriteSystem = createSpriteSystem(this, Object.keys(Sprites).map(s => s.toLowerCase()));
-        this.debugSystem = createDebugSystem(this);
+        this.uiSystem = createUISystem(this);
 
         // Collisions
         // const enemies = this.physics.add.group();
@@ -77,6 +72,6 @@ export class GuardLevel extends Scene {
         this.healthBarSystem(this.world);
         this.damageDisplaySystem(this.world);
         this.spriteSystem(this.world);
-        this.debugSystem(this.world);
+        this.uiSystem(this.world);
     }
 }

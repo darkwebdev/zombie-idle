@@ -34,6 +34,11 @@ export const respawnGuard = entity => {
     Sprite.isFlipped[entity] = 1;
 }
 
+export const createGuard = scene => {
+    createGuardAnims(scene.anims);
+    return addGuardEntity(scene.world);
+};
+
 export const addGuardEntity = world => {
     const entity = addEntity(world);
 

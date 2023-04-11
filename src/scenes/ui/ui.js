@@ -6,7 +6,7 @@ export const loadUi = scene => {
     scene.load.atlas('icons', 'assets/icons.png', 'assets/icons.json');
 }
 
-export const createUI = (scene, menu) => {
+export const createUI = ({ scene, menu, player, InputDebug, InputAutoplay, InputSpeed }) => {
     const buttons = new Buttons(scene, {
         x: 0,
         y: 0,
@@ -17,10 +17,17 @@ export const createUI = (scene, menu) => {
         },
     });
 
-    addMenuButton('gear_white.png', () => {
-        console.log('MENU')
+    addMenuButton('gear.png', () => {
         menu.open();
-    })
+    });
+    addMenuButton('right.png', () => {
+        console.log('PLAY')
+        InputAutoplay[player] = 1;
+    });
+    addMenuButton('pause.png', () => {
+        console.log('PAUSE')
+        InputAutoplay[player] = 0;
+    });
 
     scene.add
         .existing(buttons)

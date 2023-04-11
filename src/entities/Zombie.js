@@ -43,6 +43,11 @@ export const respawnZombie = entity => {
     Sprite.texture[entity] = Sprites.Zombie;
 };
 
+export const createZombie = scene => {
+    createZombieAnims(scene.anims);
+    return addZombieEntity(scene.world);
+}
+
 export const addZombieEntity = world => {
     const zombie = addEntity(world);
 

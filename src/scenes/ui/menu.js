@@ -83,7 +83,7 @@ export const MainMenu = (scene) => {
     }
 
     function open() {
-        //todo: pause
+        scene.scene.pause();
         modal.requestOpen();
         menu.setVisible(true);
     }
@@ -91,7 +91,7 @@ export const MainMenu = (scene) => {
     function close() {
         modal.requestClose();
         menu.setVisible(false);
-        //todo: unpause
+        scene.scene.resume();
     }
 
     function toggle() {

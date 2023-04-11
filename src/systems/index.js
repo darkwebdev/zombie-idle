@@ -5,4 +5,4 @@ export { default as createPlayerSystem } from './PlayerSystem';
 export { default as createSpriteSystem } from './SpriteSystem';
 export { default as createHealthBarSystem } from './HealthBarSystem';
 export { default as createDamageDisplaySystem } from './DamageDisplaySystem';
-export { default as createDebugSystem } from './DebugSystem';
+export { default as createUISystem } from './UISystem';

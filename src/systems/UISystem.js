@@ -14,6 +14,8 @@ import {
 } from '../components';
 import { SkillProps } from '../const';
 import { addGuardEntity, respawnGuard } from '../entities/Guard';
+import { createUI } from '../scenes/ui/ui';
+import { MainMenu } from '../scenes/ui/menu';
 
 const style = {
     font: '16px Courier',
@@ -24,17 +26,29 @@ const colXs = [10, 160, 360, 550, 750];
 let enemy = 1;
 
 export default (scene) => {
+    const [player] = defineQuery([Player,])(scene.world);
+    const enemiesQuery = defineQuery([Stats, Not(Player),]);
+    const attackedMeleeQuery = defineQuery([AttackedMelee,]);
+
+    createUI({
+        scene,
+        menu: MainMenu(scene),
+        player,
+        InputDebug: Input.debug,
+        InputAutoplay: Input.autoplay,
+        InputSpeed: Input.speed,
+    });
+
+    // Debug settings:
+    Input.debug[player] = 0;
+    scene.debugDraw.toggle();
+    toggleSceneWatcher();
     scene.debugDraw.showPointers = false;
     //showInput
     //showInactivePointers
     //showRotation
     //showLights
 
-    const [player] = defineQuery([Player,])(scene.world);
-    const enemiesQuery = defineQuery([Stats, Not(Player),]);
-    const attackedMeleeQuery = defineQuery([AttackedMelee,]);
-
-    Input.debug[player] = 1;
     const cols = [0,1,2,3].map(i => scene.add
         .text(colXs[i], COL_Y, '', style)
         .setOrigin(0, 0)
@@ -113,14 +127,14 @@ export default (scene) => {
     });
 
     return defineSystem((world) => {
-        if (Input.debug[player]) {
-            if (scene.cursors.right.isDown) {
-                Input.autoplay[player] = 0;
-                Input.speed[player] = 1;
-            } else if (!Input.autoplay[player]) {
-                Input.speed[player] = 0;
-            }
+        if (scene.cursors.right.isDown) {
+            Input.autoplay[player] = 0;
+            Input.speed[player] = 1;
+        } else if (!Input.autoplay[player]) {
+            Input.speed[player] = 0;
+        }
 
+        if (Input.debug[player]) {
             const enemies = enemiesQuery(world);
             const attackedMeleeEntities = attackedMeleeQuery(world);
             const state = entity =>
@@ -158,11 +172,7 @@ export default (scene) => {
                 `melee targets (${meleeTargets.length}):\n[${meleeTargets}]`,
             ]);
             cols[3].setText([
-                `Hotkeys`,
-                'Space - autoplay on/off',
-                'Arrow right - play step',
-                'H - increase hit chance',
-                'R - respawn target',
+                '',
             ]);
         } else {
             cols.forEach(c => c.setText(''));

@@ -33,6 +33,11 @@ export const respawnRecruit = entity => {
     Sprite.texture[entity] = Sprites.Recruit;
 }
 
+export const createRecruit = scene => {
+    createRecruitAnims(scene.anims);
+    return addRecruitEntity(scene.world);
+};
+
 export const addRecruitEntity = world => {
     const entity = addEntity(world);
 

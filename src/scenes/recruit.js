@@ -7,17 +7,16 @@ import {
     createPlayerSystem,
     createSpriteSystem,
     createHealthBarSystem,
-    createDebugSystem,
+    createUISystem,
     createDamageDisplaySystem,
     createSkillSystem,
 } from '../systems';
-import { MainMenu } from './ui/menu';
-import { createZombieAnims, addZombieEntity, respawnZombie, loadZombieAtlas, } from '../entities/Zombie';
-import { addRecruitEntity, createRecruitAnims, loadRecruitAtlas, respawnRecruit } from '../entities/Recruit';
+import { respawnZombie, loadZombieAtlas, createZombie, } from '../entities/Zombie';
+import { createRecruit, loadRecruitAtlas, respawnRecruit } from '../entities/Recruit';
 import { createBg, loadBg } from './common/nightCity';
 import { Levels, Sprites } from '../const';
 import { showPreloader } from './common/preloader';
-import { createUI, loadUi } from './ui/ui';
+import { loadUi } from './ui/ui';
 
 export class RecruitLevel extends Scene {
     constructor() {
@@ -37,18 +36,14 @@ export class RecruitLevel extends Scene {
 
     create() {
         createBg(this);
-        createUI(this, MainMenu(this));
-        createZombieAnims(this.anims);
-        createRecruitAnims(this.anims);
-
 
         // ECS
         this.world = window.world = createWorld();
         this.world.name = 'Zombieland';
-        const zombie = addZombieEntity(this.world);
+        const zombie = createZombie(this);
         respawnZombie(zombie);
-        const soldier = addRecruitEntity(this.world);
-        respawnRecruit(soldier);
+        const recruit = createRecruit(this);
+        respawnRecruit(recruit);
 
         this.playerSystem = createPlayerSystem();
         this.movementSystem = createMovementSystem();
@@ -57,7 +52,7 @@ export class RecruitLevel extends Scene {
         this.healthBarSystem = createHealthBarSystem(this);
         this.damageDisplaySystem = createDamageDisplaySystem(this);
         this.spriteSystem = createSpriteSystem(this, Object.keys(Sprites).map(s => s.toLowerCase()));
-        this.debugSystem = createDebugSystem(this);
+        this.uiSystem = createUISystem(this);
 
     }
 
@@ -71,6 +66,6 @@ export class RecruitLevel extends Scene {
         this.healthBarSystem(this.world);
         this.damageDisplaySystem(this.world);
         this.spriteSystem(this.world);
-        this.debugSystem(this.world);
+        this.uiSystem(this.world);
     }
 }
